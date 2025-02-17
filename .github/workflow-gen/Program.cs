@@ -108,7 +108,8 @@ void GenerateReleaseWorkflow(Component component)
 
     workflow.On
         .WorkflowDispatch()
-        .Inputs(new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"));
+        .Inputs(new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"))
+        .Inputs(new StringInput("target-branch", "(Optional) the name of the branch to release from", false, "main"));
 
     workflow.EnvDefaults();
 
@@ -121,6 +122,11 @@ void GenerateReleaseWorkflow(Component component)
 
     tagJob.Step()
         .ActionsCheckout();
+
+    tagJob.Step()
+        .Name("Checkout target branch")
+        .If("github.event.inputs.branch != 'main'")
+        .Run("git checkout ${{ github.event.inputs.branch }}");
 
     tagJob.StepSetupDotNet();
 
