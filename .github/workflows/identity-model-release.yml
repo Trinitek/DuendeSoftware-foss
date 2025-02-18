@@ -4,6 +4,11 @@ name: identity-model/release
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Version in format X.Y.Z or X.Y.Z-preview.'
+        type: string
+        required: true
+        default: '0.0.0'
       target-branch:
         description: '(Optional) the name of the branch to release from'
         type: string
