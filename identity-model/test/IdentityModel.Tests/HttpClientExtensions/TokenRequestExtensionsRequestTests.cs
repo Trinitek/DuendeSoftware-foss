@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel.HttpClientExtensions
@@ -48,20 +46,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var _ = await client.RequestTokenAsync(request);
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(3);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(3);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
         [Fact]
@@ -70,8 +68,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var response = await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
                 { ClientId = "client" });
 
-            response.IsError.Should().BeFalse();
-            _handler.Request.RequestUri.AbsoluteUri.Should().Be(Endpoint);
+            response.IsError.ShouldBeFalse();
+            _handler.Request.RequestUri.AbsoluteUri.ShouldBe(Endpoint);
         }
 
         [Fact]
@@ -84,24 +82,24 @@ namespace Duende.IdentityModel.HttpClientExtensions
             };
 
             var response = await _client.RequestClientCredentialsTokenAsync(request);
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.ClientCredentials);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.ClientCredentials);
 
-            fields.TryGetValue("scope", out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
 
             response = await _client.RequestClientCredentialsTokenAsync(request);
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.ClientCredentials);
+            fields.TryGetValue("grant_type", out grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.ClientCredentials);
 
-            fields.TryGetValue("scope", out scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
         }
 
         [Fact]
@@ -114,19 +112,19 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Resource = { "resource1", "resource2" }
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.ClientCredentials);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.ClientCredentials);
 
-            fields.TryGetValue("scope", out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
 
-            fields.TryGetValue("resource", out var resource).Should().BeTrue();
-            resource.Count.Should().Be(2);
-            resource[0].Should().Be("resource1");
-            resource[1].Should().Be("resource2");
+            fields.TryGetValue("resource", out var resource).ShouldBeTrue();
+            resource.Count.ShouldBe(2);
+            resource[0].ShouldBe("resource1");
+            resource[1].ShouldBe("resource2");
         }
 
         [Fact]
@@ -142,12 +140,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var response = await _client.RequestClientCredentialsTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var headers = _handler.Request.Headers;
             var foo = headers.FirstOrDefault(h => h.Key == "foo");
-            foo.Should().NotBeNull();
-            foo.Value.Single().Should().Be("bar");
+            foo.Value.Single().ShouldBe("bar");
         }
 
         [Fact]
@@ -163,12 +160,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var response = await _client.RequestClientCredentialsTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var properties = _handler.Request.GetProperties();
             var foo = properties.First().Value as string;
-            foo.Should().NotBeNull();
-            foo.Should().Be("bar");
+            foo.ShouldNotBeNull();
+            foo.ShouldBe("bar");
         }
 
         [Fact]
@@ -183,8 +180,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var response = await _client.RequestClientCredentialsTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
-            _handler.Request.Headers.Single(x => x.Key == "DPoP").Value.First().Should().Be("dpop_token");
+            response.IsError.ShouldBeFalse();
+            _handler.Request.Headers.Single(x => x.Key == "DPoP").Value.First().ShouldBe("dpop_token");
         }
 
         [Fact]
@@ -210,8 +207,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
             
             var response = await _client.RequestClientCredentialsTokenAsync(request);
 
-            response.IsError.Should().BeTrue();
-            response.DPoPNonce.Should().Be("dpop_nonce");
+            response.IsError.ShouldBeTrue();
+            response.DPoPNonce.ShouldBe("dpop_nonce");
         }
 
 
@@ -222,7 +219,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
                     { ClientId = "client", Parameters = null });
 
-            await act.Should().NotThrowAsync();
+            await act.ShouldNotThrowAsync();
         }
 
         [Fact]
@@ -234,14 +231,14 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 DeviceCode = "device_code"
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.DeviceCode);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.DeviceCode);
 
-            fields.TryGetValue("device_code", out var device_code).Should().BeTrue();
-            device_code.First().Should().Be("device_code");
+            fields.TryGetValue("device_code", out var device_code).ShouldBeTrue();
+            device_code.First().ShouldBe("device_code");
         }
 
         [Fact]
@@ -250,7 +247,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
             Func<Task> act = async () =>
                 await _client.RequestDeviceTokenAsync(new DeviceTokenRequest { ClientId = "device" });
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("device_code");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("device_code");
         }
 
         [Fact]
@@ -265,25 +263,25 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Resource = { "resource1", "resource2" }
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.Password);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.Password);
 
-            fields.TryGetValue("username", out var username).Should().BeTrue();
-            username.First().Should().Be("user");
+            fields.TryGetValue("username", out var username).ShouldBeTrue();
+            username.First().ShouldBe("user");
 
-            fields.TryGetValue("password", out var password).Should().BeTrue();
-            grant_type.First().Should().Be("password");
+            fields.TryGetValue("password", out var password).ShouldBeTrue();
+            grant_type.First().ShouldBe("password");
 
-            fields.TryGetValue("scope", out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
 
-            fields.TryGetValue("resource", out var resource).Should().BeTrue();
-            resource.Count.Should().Be(2);
-            resource[0].Should().Be("resource1");
-            resource[1].Should().Be("resource2");
+            fields.TryGetValue("resource", out var resource).ShouldBeTrue();
+            resource.Count.ShouldBe(2);
+            resource[0].ShouldBe("resource1");
+            resource[1].ShouldBe("resource2");
         }
 
         [Fact]
@@ -295,17 +293,17 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 UserName = "user"
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.Password);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.Password);
 
-            fields.TryGetValue("username", out var username).Should().BeTrue();
-            username.First().Should().Be("user");
+            fields.TryGetValue("username", out var username).ShouldBeTrue();
+            username.First().ShouldBe("user");
 
-            fields.TryGetValue("password", out var password).Should().BeTrue();
-            password.First().Should().Be("");
+            fields.TryGetValue("password", out var password).ShouldBeTrue();
+            password.First().ShouldBe("");
         }
 
         [Fact]
@@ -313,7 +311,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
         {
             Func<Task> act = async () => await _client.RequestPasswordTokenAsync(new PasswordTokenRequest());
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("username");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("username");
         }
 
         [Fact]
@@ -328,25 +327,25 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Resource = { "resource1", "resource2" },
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.AuthorizationCode);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.AuthorizationCode);
 
-            fields.TryGetValue("code", out var code).Should().BeTrue();
-            code.First().Should().Be("code");
+            fields.TryGetValue("code", out var code).ShouldBeTrue();
+            code.First().ShouldBe("code");
 
-            fields.TryGetValue("redirect_uri", out var redirect_uri).Should().BeTrue();
-            redirect_uri.First().Should().Be("uri");
+            fields.TryGetValue("redirect_uri", out var redirect_uri).ShouldBeTrue();
+            redirect_uri.First().ShouldBe("uri");
 
-            fields.TryGetValue("code_verifier", out var code_verifier).Should().BeTrue();
-            code_verifier.First().Should().Be("verifier");
+            fields.TryGetValue("code_verifier", out var code_verifier).ShouldBeTrue();
+            code_verifier.First().ShouldBe("verifier");
 
-            fields.TryGetValue("resource", out var resource).Should().BeTrue();
-            resource.Count.Should().Be(2);
-            resource[0].Should().Be("resource1");
-            resource[1].Should().Be("resource2");
+            fields.TryGetValue("resource", out var resource).ShouldBeTrue();
+            resource.Count.ShouldBe(2);
+            resource[0].ShouldBe("resource1");
+            resource[1].ShouldBe("resource2");
         }
 
         [Fact]
@@ -358,7 +357,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
                     RedirectUri = "uri"
                 });
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("code");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("code");
         }
 
         [Fact]
@@ -370,7 +370,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
                     Code = "code"
                 });
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("redirect_uri");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("redirect_uri");
         }
 
         [Fact]
@@ -384,22 +385,22 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Resource = { "resource1", "resource2" }
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.RefreshToken);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.RefreshToken);
 
-            fields.TryGetValue("refresh_token", out var code).Should().BeTrue();
-            code.First().Should().Be("rt");
+            fields.TryGetValue("refresh_token", out var code).ShouldBeTrue();
+            code.First().ShouldBe("rt");
 
-            fields.TryGetValue("scope", out var redirect_uri).Should().BeTrue();
-            redirect_uri.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var redirect_uri).ShouldBeTrue();
+            redirect_uri.First().ShouldBe("scope");
 
-            fields.TryGetValue("resource", out var resource).Should().BeTrue();
-            resource.Count.Should().Be(2);
-            resource[0].Should().Be("resource1");
-            resource[1].Should().Be("resource2");
+            fields.TryGetValue("resource", out var resource).ShouldBeTrue();
+            resource.Count.ShouldBe(2);
+            resource[0].ShouldBe("resource1");
+            resource[1].ShouldBe("resource2");
         }
 
         [Fact]
@@ -407,7 +408,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
         {
             Func<Task> act = async () => await _client.RequestRefreshTokenAsync(new RefreshTokenRequest());
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("refresh_token");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("refresh_token");
         }
 
         [Fact]
@@ -428,32 +430,32 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ActorTokenType = "actor_token_type"
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.TokenExchange);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.TokenExchange);
 
-            fields.TryGetValue("subject_token", out var subject_token).Should().BeTrue();
-            subject_token.First().Should().Be("subject_token");
+            fields.TryGetValue("subject_token", out var subject_token).ShouldBeTrue();
+            subject_token.First().ShouldBe("subject_token");
 
-            fields.TryGetValue("subject_token_type", out var subject_token_type).Should().BeTrue();
-            subject_token_type.First().Should().Be("subject_token_type");
+            fields.TryGetValue("subject_token_type", out var subject_token_type).ShouldBeTrue();
+            subject_token_type.First().ShouldBe("subject_token_type");
 
-            fields.TryGetValue("scope", out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
 
-            fields.TryGetValue("resource", out var resource).Should().BeTrue();
-            resource.First().Should().Be("resource");
+            fields.TryGetValue("resource", out var resource).ShouldBeTrue();
+            resource.First().ShouldBe("resource");
 
-            fields.TryGetValue("audience", out var audience).Should().BeTrue();
-            audience.First().Should().Be("audience");
+            fields.TryGetValue("audience", out var audience).ShouldBeTrue();
+            audience.First().ShouldBe("audience");
 
-            fields.TryGetValue("actor_token", out var actor_token).Should().BeTrue();
-            actor_token.First().Should().Be("actor_token");
+            fields.TryGetValue("actor_token", out var actor_token).ShouldBeTrue();
+            actor_token.First().ShouldBe("actor_token");
 
-            fields.TryGetValue("actor_token_type", out var actor_token_type).Should().BeTrue();
-            actor_token_type.First().Should().Be("actor_token_type");
+            fields.TryGetValue("actor_token_type", out var actor_token_type).ShouldBeTrue();
+            actor_token_type.First().ShouldBe("actor_token_type");
         }
         
         [Fact]
@@ -471,19 +473,19 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 }
             });
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.Ciba);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.Ciba);
 
-            fields.TryGetValue("auth_req_id", out var id).Should().BeTrue();
-            id.First().Should().Be("id");
+            fields.TryGetValue("auth_req_id", out var id).ShouldBeTrue();
+            id.First().ShouldBe("id");
             
-            fields.TryGetValue(OidcConstants.TokenRequest.Resource, out var resource).Should().BeTrue();
-            resource.Count.Should().Be(2);
-            resource.First().Should().Be("resource1");
-            resource.Skip(1).First().Should().Be("resource2");
+            fields.TryGetValue(OidcConstants.TokenRequest.Resource, out var resource).ShouldBeTrue();
+            resource.Count.ShouldBe(2);
+            resource.First().ShouldBe("resource1");
+            resource.Skip(1).First().ShouldBe("resource2");
         }
 
         [Fact]
@@ -491,7 +493,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
         {
             Func<Task> act = async () => await _client.RequestTokenAsync(new TokenRequest());
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("grant_type");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("grant_type");
         }
 
         [Fact]
@@ -510,20 +513,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be("test");
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe("test");
 
-            fields.TryGetValue("client_id", out var client_id).Should().BeTrue();
-            client_id.First().Should().Be("custom");
+            fields.TryGetValue("client_id", out var client_id).ShouldBeTrue();
+            client_id.First().ShouldBe("custom");
 
-            fields.TryGetValue("client_secret", out var client_secret).Should().BeTrue();
-            client_secret.First().Should().Be("custom");
+            fields.TryGetValue("client_secret", out var client_secret).ShouldBeTrue();
+            client_secret.First().ShouldBe("custom");
 
-            fields.TryGetValue("custom", out var custom).Should().BeTrue();
-            custom.First().Should().Be("custom");
+            fields.TryGetValue("custom", out var custom).ShouldBeTrue();
+            custom.First().ShouldBe("custom");
         }
 
         [Fact]
@@ -543,11 +546,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var request = _handler.Request;
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be("custom");
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe("custom");
 
-            fields.TryGetValue("custom", out var custom).Should().BeTrue();
-            custom.First().Should().Be("custom");
+            fields.TryGetValue("custom", out var custom).ShouldBeTrue();
+            custom.First().ShouldBe("custom");
         }
 
         [Fact]
@@ -563,22 +566,22 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = _handler.Request;
 
-            request.RequestUri.AbsoluteUri.Should().Be("https://token/");
+            request.RequestUri.AbsoluteUri.ShouldBe("https://token/");
 
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
 
-            fields.TryGetValue("grant_type", out var field).Should().BeTrue();
-            field.First().Should().Be("test");
+            fields.TryGetValue("grant_type", out var field).ShouldBeTrue();
+            field.First().ShouldBe("test");
 
-            fields.TryGetValue("client_id", out field).Should().BeTrue();
-            field.First().Should().Be("client");
+            fields.TryGetValue("client_id", out field).ShouldBeTrue();
+            field.First().ShouldBe("client");
 
-            fields.TryGetValue("client_secret", out field).Should().BeTrue();
-            field.First().Should().Be("secret");
+            fields.TryGetValue("client_secret", out field).ShouldBeTrue();
+            field.First().ShouldBe("secret");
 
-            fields.TryGetValue("scope", out field).Should().BeTrue();
-            field.First().Should().Be("scope");
+            fields.TryGetValue("scope", out field).ShouldBeTrue();
+            field.First().ShouldBe("scope");
         }
 
         [Fact]
@@ -594,10 +597,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should()
-                .Be(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter
+                .ShouldBe(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
         }
 
         [Fact]
@@ -612,11 +615,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
             });
 
             var request = _handler.Request;
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields["client_id"].First().Should().Be("client");
-            fields["client_secret"].First().Should().Be("secret");
+            fields["client_id"].First().ShouldBe("client");
+            fields["client_secret"].First().ShouldBe("secret");
         }
 
         [Fact]
@@ -631,10 +634,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields["client_id"].First().Should().Be("client");
+            fields["client_id"].First().ShouldBe("client");
         }
 
         [Fact]
@@ -649,14 +652,14 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should()
-                .Be(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", ""));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter
+                .ShouldBe(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", ""));
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("client_secret", out _).Should().BeFalse();
-            fields.TryGetValue("client_id", out _).Should().BeFalse();
+            fields.TryGetValue("client_secret", out _).ShouldBeFalse();
+            fields.TryGetValue("client_id", out _).ShouldBeFalse();
         }
 
         [Fact]
@@ -670,8 +673,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader
             });
 
-            await act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage("CredentialStyle.AuthorizationHeader and client assertions are not compatible");
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldBe("CredentialStyle.AuthorizationHeader and client assertions are not compatible");
         }
 
         [Fact]
@@ -689,10 +692,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
 
-            fields["grant_type"].First().Should().Be("test");
-            fields["client_id"].First().Should().Be("client");
-            fields["client_assertion_type"].First().Should().Be("type");
-            fields["client_assertion"].First().Should().Be("value");
+            fields["grant_type"].First().ShouldBe("test");
+            fields["client_id"].First().ShouldBe("client");
+            fields["client_assertion_type"].First().ShouldBe("type");
+            fields["client_assertion"].First().ShouldBe("value");
         }
         
         [Fact]
@@ -709,9 +712,9 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
 
-            fields["grant_type"].First().Should().Be("test");
-            fields["client_assertion_type"].First().Should().Be("type");
-            fields["client_assertion"].First().Should().Be("value");
+            fields["grant_type"].First().ShouldBe("test");
+            fields["client_assertion_type"].First().ShouldBe("type");
+            fields["client_assertion"].First().ShouldBe("value");
         }
     }
 }

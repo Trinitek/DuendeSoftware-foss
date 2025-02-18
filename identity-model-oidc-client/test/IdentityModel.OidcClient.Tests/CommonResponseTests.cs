@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using FluentAssertions;
+
 using Duende.IdentityModel.Jwk;
 
 namespace Duende.IdentityModel.OidcClient
@@ -28,8 +28,8 @@ namespace Duende.IdentityModel.OidcClient
             var url = $"?state={state.State}&id_token=foo";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("Missing authorization code.");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("Missing authorization code.");
         }
 
         [Fact]
@@ -41,8 +41,8 @@ namespace Duende.IdentityModel.OidcClient
             var url = $"?code=foo&id_token=foo";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("Missing state.");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("Missing state.");
         }
 
         [Fact]
@@ -54,8 +54,8 @@ namespace Duende.IdentityModel.OidcClient
             var url = $"?state=invalid&id_token=foo&code=bar";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("Invalid state.");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("Invalid state.");
         }
     }
 }

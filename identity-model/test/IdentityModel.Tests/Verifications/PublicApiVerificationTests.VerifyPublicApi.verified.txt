@@ -1083,8 +1083,8 @@ namespace Duende.IdentityModel.Client
         public bool ContainsKey(string key) { }
         public System.Collections.Generic.IEnumerable<string> GetValues(string name) { }
         public Duende.IdentityModel.Client.Parameters Merge(Duende.IdentityModel.Client.Parameters? additionalValues = null) { }
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("The FromObject method uses reflection in a way that is incompatible with trimming" +
-            ".")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(("The FromObject method uses reflection in a way that is incompatible with trimming" +
+            "."))]
         public static Duende.IdentityModel.Client.Parameters? FromObject(object values) { }
     }
     public class PasswordTokenRequest : Duende.IdentityModel.Client.TokenRequest

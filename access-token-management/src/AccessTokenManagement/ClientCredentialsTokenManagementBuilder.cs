@@ -8,18 +8,9 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// Builder for client credential clients
 /// </summary>
-public class ClientCredentialsTokenManagementBuilder
+public class ClientCredentialsTokenManagementBuilder(IServiceCollection services)
 {
-    private readonly IServiceCollection _services;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="services"></param>
-    public ClientCredentialsTokenManagementBuilder(IServiceCollection services)
-    {
-        _services = services;
-    }
+    public IServiceCollection Services { get; } = services;
 
     /// <summary>
     /// Adds a client credentials client to the token management system
@@ -29,7 +20,7 @@ public class ClientCredentialsTokenManagementBuilder
     /// <returns></returns>
     public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClient> configureOptions)
     {
-        _services.Configure(name, configureOptions);
+        Services.Configure(name, configureOptions);
         return this;
     }
 }

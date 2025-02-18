@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel.HttpClientExtensions
@@ -44,20 +42,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(3);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(3);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
         [Fact]
@@ -78,10 +76,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
 
             var fields = QueryHelpers.ParseQuery(handler.Body);
-            fields.Count.Should().Be(2);
+            fields.Count.ShouldBe(2);
 
-            fields["client_id"].First().Should().Be("client");
-            fields["request"].First().Should().Be("request object value");
+            fields["client_id"].First().ShouldBe("client");
+            fields["request"].First().ShouldBe("request object value");
         }
 
         [Fact]
@@ -97,11 +95,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var response = await client.PushAuthorizationAsync(Request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.RequestUri.Should().Be("urn:ietf:params:oauth:request_uri:123456");
-            response.ExpiresIn.Should().Be(600);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.RequestUri.ShouldBe("urn:ietf:params:oauth:request_uri:123456");
+            response.ExpiresIn.ShouldBe(600);
         }
 
         [Fact]
@@ -113,10 +111,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var client = new HttpClient(handler);
             var response = await client.PushAuthorizationAsync(Request);
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Raw.Should().Be("invalid");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Raw.ShouldBe("invalid");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -127,10 +125,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var client = new HttpClient(handler);
             var response = await client.PushAuthorizationAsync(Request);
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Error.Should().Be("exception");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Error.ShouldBe("exception");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -141,10 +139,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var client = new HttpClient(handler);
             var response = await client.PushAuthorizationAsync(Request);
 
-            response.IsError.Should().BeTrue();
-            response.Error.Should().Be("not found");
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
+            response.IsError.ShouldBeTrue();
+            response.Error.ShouldBe("not found");
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
         }
 
         [Fact]
@@ -169,18 +167,18 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             // check request
             var fields = QueryHelpers.ParseQuery(handler.Body);
-            fields.Count.Should().Be(5);
+            fields.Count.ShouldBe(5);
 
-            fields["client_id"].First().Should().Be("client");
-            fields["response_type"].First().Should().Be("code");
-            fields["acr_values"].First().Should().Be("idp:example");
-            fields["scope"].First().Should().Be("scope1 scope2");
-            fields["foo"].First().Should().Be("bar");
+            fields["client_id"].First().ShouldBe("client");
+            fields["response_type"].First().ShouldBe("code");
+            fields["acr_values"].First().ShouldBe("idp:example");
+            fields["scope"].First().ShouldBe("scope1 scope2");
+            fields["foo"].First().ShouldBe("bar");
 
             // check response
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
         }
 
         [Fact]
@@ -194,7 +192,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             Func<Task> act = async () => await client.PushAuthorizationAsync(Request);
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("response_type");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("response_type");
         }
 
         [Fact]
@@ -209,7 +208,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             Func<Task> act = async () => await client.PushAuthorizationAsync(Request);
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("request_uri");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("request_uri");
         }
     }
 }

@@ -5,9 +5,8 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Web;
-using Duende.IdentityModel.OidcClient.Infrastructure;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
+using Duende.IdentityModel.OidcClient.Infrastructure;
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -44,7 +43,7 @@ namespace Duende.IdentityModel.OidcClient
         [Fact]
         public async Task Valid_response_with_id_token_should_succeed()
         {
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -66,22 +65,22 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().NotBeNull();
-            result.User.Should().NotBeNull();
-            result.AuthenticationTime.Should().Be(DateTimeOffset.FromUnixTimeSeconds(123));
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
+            result.AuthenticationTime.ShouldBe(DateTimeOffset.FromUnixTimeSeconds(123));
 
-            result.User.Claims.Count().Should().Be(1);
-            result.User.Claims.First().Type.Should().Be("sub");
-            result.User.Claims.First().Value.Should().Be("123");
+            result.User.Claims.Count().ShouldBe(1);
+            result.User.Claims.First().Type.ShouldBe("sub");
+            result.User.Claims.First().Value.ShouldBe("123");
         }
 
         [Fact]
         public async Task Valid_response_without_id_token_should_succeed()
         {
             _options.Scope = "api";
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -98,10 +97,10 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().BeNull();
-            result.User.Identity.IsAuthenticated.Should().BeFalse();
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldBeNull();
+            result.User.Identity.IsAuthenticated.ShouldBeFalse();
         }
 
         [Fact]
@@ -109,7 +108,7 @@ namespace Duende.IdentityModel.OidcClient
         {
             _options.LoadProfile = true;
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -151,25 +150,25 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().NotBeNull();
-            result.User.Should().NotBeNull();
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
 
-            result.User.Claims.Count().Should().Be(2);
-            result.User.Claims.First().Type.Should().Be("sub");
-            result.User.Claims.First().Value.Should().Be("123");
-            result.User.Claims.Skip(1).First().Type.Should().Be("name");
-            result.User.Claims.Skip(1).First().Value.Should().Be("Dominick");
+            result.User.Claims.Count().ShouldBe(2);
+            result.User.Claims.First().Type.ShouldBe("sub");
+            result.User.Claims.First().Value.ShouldBe("123");
+            result.User.Claims.Skip(1).First().Type.ShouldBe("name");
+            result.User.Claims.Skip(1).First().Value.ShouldBe("Dominick");
         }
 
         [Fact]
         public async Task Sending_authorization_header_should_succeed()
         {
             _options.ClientSecret = "secret";
-            _options.TokenClientCredentialStyle = global::Duende.IdentityModel.Client.ClientCredentialStyle.AuthorizationHeader;
+            _options.TokenClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -192,19 +191,19 @@ namespace Duende.IdentityModel.OidcClient
 
             var request = backChannelHandler.Request;
 
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should()
-                .Be(Duende.IdentityModel.Client.BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter
+                .ShouldBe(Client.BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
         }
 
         [Fact]
         public async Task Sending_client_credentials_in_body_should_succeed()
         {
             _options.ClientSecret = "secret";
-            _options.TokenClientCredentialStyle = global::Duende.IdentityModel.Client.ClientCredentialStyle.PostBody;
+            _options.TokenClientCredentialStyle = ClientCredentialStyle.PostBody;
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -226,14 +225,14 @@ namespace Duende.IdentityModel.OidcClient
             var result = await client.ProcessResponseAsync(url, state);
 
             var fields = QueryHelpers.ParseQuery(backChannelHandler.Body);
-            fields["client_id"].First().Should().Be("client");
-            fields["client_secret"].First().Should().Be("secret");
+            fields["client_id"].First().ShouldBe("client");
+            fields["client_secret"].First().ShouldBe("secret");
         }
 
         [Fact]
         public async Task Multi_tenant_token_issuer_name_should_succeed_by_policy_option()
         {
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             _options.Policy.Discovery.ValidateEndpoints = false;
@@ -257,16 +256,16 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().NotBeNull();
-            result.User.Should().NotBeNull();
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
         }
 
         [Fact]
         public async Task Extra_parameters_on_backchannel_should_be_sent()
         {
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -293,21 +292,21 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await client.ProcessResponseAsync(url, state, backChannel);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().NotBeNull();
-            result.User.Should().NotBeNull();
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
 
             var body = handler.Body;
-            body.Should().Contain("foo=foo");
-            body.Should().Contain("bar=bar");
+            body.ShouldContain("foo=foo");
+            body.ShouldContain("bar=bar");
         }
 
         [Fact]
         public async Task No_identity_token_validator_should_fail()
         {
             _options.Policy.RequireIdentityTokenSignature = true;
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -327,8 +326,8 @@ namespace Duende.IdentityModel.OidcClient
                 new NetworkHandler(JsonSerializer.Serialize(tokenResponse), HttpStatusCode.OK);
 
             var act = async () => { await client.ProcessResponseAsync(url, state); };
-            await act.Should().ThrowAsync<InvalidOperationException>()
-                .Where(e => e.Message.StartsWith("No IIdentityTokenValidator is configured"));
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldStartWith("No IIdentityTokenValidator is configured.");
         }
 
         [Fact]
@@ -336,14 +335,14 @@ namespace Duende.IdentityModel.OidcClient
         {
             _options.BackchannelHandler = new NetworkHandler(new Exception("error"));
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().StartWith("Error redeeming code: error");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldStartWith("Error redeeming code: error");
         }
 
         [Fact]
@@ -360,14 +359,14 @@ namespace Duende.IdentityModel.OidcClient
             _options.BackchannelHandler =
                 new NetworkHandler(JsonSerializer.Serialize(tokenResponse), HttpStatusCode.OK);
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("Error validating token response: Access token is missing on token response.");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("Error validating token response: Access token is missing on token response.");
         }
 
         [Fact]
@@ -383,18 +382,18 @@ namespace Duende.IdentityModel.OidcClient
             _options.BackchannelHandler =
                 new NetworkHandler(JsonSerializer.Serialize(tokenResponse), HttpStatusCode.OK);
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().BeNull();
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldBeNull();
 
-            result.User.Should().NotBeNull();
-            result.User.Claims.Count().Should().Be(0);
+            result.User.ShouldNotBeNull();
+            result.User.Claims.Count().ShouldBe(0);
         }
 
         [Fact]
@@ -402,7 +401,7 @@ namespace Duende.IdentityModel.OidcClient
         {
             _options.LoadProfile = true;
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
@@ -443,16 +442,16 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeFalse();
-            result.AccessToken.Should().Be("token");
-            result.IdentityToken.Should().BeNull();
-            result.User.Should().NotBeNull();
+            result.IsError.ShouldBeFalse();
+            result.AccessToken.ShouldBe("token");
+            result.IdentityToken.ShouldBeNull();
+            result.User.ShouldNotBeNull();
 
-            result.User.Claims.Count().Should().Be(2);
-            result.User.Claims.First().Type.Should().Be("sub");
-            result.User.Claims.First().Value.Should().Be("123");
-            result.User.Claims.Skip(1).First().Type.Should().Be("name");
-            result.User.Claims.Skip(1).First().Value.Should().Be("Dominick");
+            result.User.Claims.Count().ShouldBe(2);
+            result.User.Claims.First().Type.ShouldBe("sub");
+            result.User.Claims.First().Value.ShouldBe("123");
+            result.User.Claims.Skip(1).First().Type.ShouldBe("name");
+            result.User.Claims.Skip(1).First().Value.ShouldBe("Dominick");
         }
 
         [Fact]
@@ -469,14 +468,14 @@ namespace Duende.IdentityModel.OidcClient
             _options.BackchannelHandler =
                 new NetworkHandler(JsonSerializer.Serialize(tokenResponse), HttpStatusCode.OK);
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
             var state  = await client.PrepareLoginAsync();
 
             var url = $"?state={state.State}&code=bar";
             var result = await client.ProcessResponseAsync(url, state);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Contain("invalid_jwt");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldContain("invalid_jwt");
         }
 
         [Fact]
@@ -485,7 +484,7 @@ namespace Duende.IdentityModel.OidcClient
             // Configure the client for PAR, authenticating with a client secret
             _options.ClientSecret = "secret";
             _options.ProviderInformation.PushedAuthorizationRequestEndpoint = "https://this-is-set-so-par-will-be-used";
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
 
             // Mock the response from the par endpoint
             var requestUri = "mocked_request_uri";
@@ -502,16 +501,16 @@ namespace Duende.IdentityModel.OidcClient
             // Validate that the resulting PAR state is correct
             var startUrl = new Uri(state.StartUrl);
             var startUrlQueryParams = HttpUtility.ParseQueryString(startUrl.Query);
-            startUrlQueryParams.Count.Should().Be(2);
-            startUrlQueryParams.GetValues("client_id").Single().Should().Be("client");
-            startUrlQueryParams.GetValues("request_uri").Single().Should().Be(requestUri);
+            startUrlQueryParams.Count.ShouldBe(2);
+            startUrlQueryParams.GetValues("client_id").Single().ShouldBe("client");
+            startUrlQueryParams.GetValues("request_uri").Single().ShouldBe(requestUri);
 
             // Validate that the client authentication during the PAR request was correct
             var request = backChannelHandler.Request;
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should()
-                .Be(Duende.IdentityModel.Client.BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter
+                .ShouldBe(Client.BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
         }
         
         [Fact]
@@ -526,7 +525,7 @@ namespace Duende.IdentityModel.OidcClient
                 Value = clientAssertion
             };
             _options.ProviderInformation.PushedAuthorizationRequestEndpoint = "https://this-is-set-so-par-will-be-used";
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(_options);
+            var client = new OidcClient(_options);
 
             // Mock the response from the par endpoint
             var requestUri = "mocked_request_uri";
@@ -543,17 +542,17 @@ namespace Duende.IdentityModel.OidcClient
             // Validate that the resulting PAR state is correct
             var startUrl = new Uri(state.StartUrl);
             var startUrlQueryParams = HttpUtility.ParseQueryString(startUrl.Query);
-            startUrlQueryParams.Count.Should().Be(2);
-            startUrlQueryParams.GetValues("client_id").Single().Should().Be("client");
-            startUrlQueryParams.GetValues("request_uri").Single().Should().Be(requestUri);
+            startUrlQueryParams.Count.ShouldBe(2);
+            startUrlQueryParams.GetValues("client_id").Single().ShouldBe("client");
+            startUrlQueryParams.GetValues("request_uri").Single().ShouldBe(requestUri);
 
             // Validate that the client authentication during the PAR request was correct
             var parRequest = backChannelHandler.Request;
             var parContent = await parRequest.Content.ReadAsStringAsync();
             var parParams = HttpUtility.ParseQueryString(parContent);
-            parParams.GetValues("client_assertion").Single().Should().Be(clientAssertion);
-            parParams.GetValues("client_assertion_type").Single().Should().Be(clientAssertionType);
-            parRequest.Headers.Authorization.Should().BeNull();
+            parParams.GetValues("client_assertion").Single().ShouldBe(clientAssertion);
+            parParams.GetValues("client_assertion_type").Single().ShouldBe(clientAssertionType);
+            parRequest.Headers.Authorization.ShouldBeNull();
         }
     }
 }

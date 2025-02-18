@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel.HttpClientExtensions
@@ -33,12 +31,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().BeOfType<FormUrlEncodedContent>();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldBeOfType<FormUrlEncodedContent>();
             
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(2);
+            headers.Count().ShouldBe(2);
         }
         
         [Fact]
@@ -60,19 +58,19 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(3);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(3);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
         [Fact]
@@ -92,9 +90,9 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = handler.Request;
 
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should().Be(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter.ShouldBe(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
         }
 
         [Fact]
@@ -114,11 +112,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var request = handler.Request;
 
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(handler.Body);
-            fields["client_id"].First().Should().Be("client");
-            fields["client_secret"].First().Should().Be("secret");
+            fields["client_id"].First().ShouldBe("client");
+            fields["client_secret"].First().ShouldBe("secret");
         }
 
         [Fact]
@@ -134,17 +132,17 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
 
-            response.DeviceCode.Should().Be("GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8");
-            response.UserCode.Should().Be("WDJB-MJHT");
-            response.VerificationUri.Should().Be("https://www.example.com/device");
-            response.VerificationUriComplete.Should().Be("https://www.example.com/device?user_code=WDJB-MJHT");
+            response.DeviceCode.ShouldBe("GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8");
+            response.UserCode.ShouldBe("WDJB-MJHT");
+            response.VerificationUri.ShouldBe("https://www.example.com/device");
+            response.VerificationUriComplete.ShouldBe("https://www.example.com/device?user_code=WDJB-MJHT");
 
-            response.ExpiresIn.Should().Be(1800);
-            response.Interval.Should().Be(10);
+            response.ExpiresIn.ShouldBe(1800);
+            response.Interval.ShouldBe(10);
         }
 
         [Fact]
@@ -162,32 +160,32 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var client = new HttpClient(handler);
             var response = await client.RequestDeviceAuthorizationAsync(request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
 
-            response.DeviceCode.Should().Be("GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8");
-            response.UserCode.Should().Be("WDJB-MJHT");
-            response.VerificationUri.Should().Be("https://www.example.com/device");
-            response.VerificationUriComplete.Should().Be("https://www.example.com/device?user_code=WDJB-MJHT");
+            response.DeviceCode.ShouldBe("GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8");
+            response.UserCode.ShouldBe("WDJB-MJHT");
+            response.VerificationUri.ShouldBe("https://www.example.com/device");
+            response.VerificationUriComplete.ShouldBe("https://www.example.com/device?user_code=WDJB-MJHT");
 
-            response.ExpiresIn.Should().Be(1800);
-            response.Interval.Should().Be(10);
+            response.ExpiresIn.ShouldBe(1800);
+            response.Interval.ShouldBe(10);
 
             // repeat
             response = await client.RequestDeviceAuthorizationAsync(request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
 
-            response.DeviceCode.Should().Be("GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8");
-            response.UserCode.Should().Be("WDJB-MJHT");
-            response.VerificationUri.Should().Be("https://www.example.com/device");
-            response.VerificationUriComplete.Should().Be("https://www.example.com/device?user_code=WDJB-MJHT");
+            response.DeviceCode.ShouldBe("GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8");
+            response.UserCode.ShouldBe("WDJB-MJHT");
+            response.VerificationUri.ShouldBe("https://www.example.com/device");
+            response.VerificationUriComplete.ShouldBe("https://www.example.com/device?user_code=WDJB-MJHT");
 
-            response.ExpiresIn.Should().Be(1800);
-            response.Interval.Should().Be(10);
+            response.ExpiresIn.ShouldBe(1800);
+            response.Interval.ShouldBe(10);
         }
 
         [Fact]
@@ -203,12 +201,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-            response.Error.Should().Be("error");
-            response.ErrorDescription.Should().Be("error_description");
-            response.TryGet("custom").Should().Be("custom");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+            response.Error.ShouldBe("error");
+            response.ErrorDescription.ShouldBe("error_description");
+            response.TryGet("custom").ShouldBe("custom");
         }
 
         [Fact]
@@ -224,10 +222,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Raw.Should().Be("invalid");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Raw.ShouldBe("invalid");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -242,10 +240,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Error.Should().Be("exception");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Error.ShouldBe("exception");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -260,10 +258,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
-            response.Error.Should().Be("not found");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.Error.ShouldBe("not found");
         }
 
         [Fact]
@@ -278,11 +276,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            response.Error.Should().Be("Unauthorized");
-            response.Raw.Should().Be("not_json");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            response.Error.ShouldBe("Unauthorized");
+            response.Raw.ShouldBe("not_json");
         }
 
         [Fact]
@@ -303,13 +301,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            response.Error.Should().Be("Unauthorized");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            response.Error.ShouldBe("Unauthorized");
 
-            response.Json?.TryGetString("foo").Should().Be("foo");
-            response.Json?.TryGetString("bar").Should().Be("bar");
+            response.Json?.TryGetString("foo").ShouldBe("foo");
+            response.Json?.TryGetString("bar").ShouldBe("bar");
         }
     }
 }

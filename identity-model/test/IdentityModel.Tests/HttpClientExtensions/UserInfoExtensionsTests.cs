@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.HttpClientExtensions
 {
@@ -26,10 +24,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.Claims.Should().NotBeEmpty();
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.Claims.ShouldNotBeEmpty();
         }
 
         [Fact]
@@ -51,21 +49,21 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Get);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().BeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Get);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(3);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
-            headers.Should().Contain(h => h.Key == "Authorization" && h.Value.First() == "Bearer token");
+            headers.Count().ShouldBe(3);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.ShouldContain(h => h.Key == "Authorization" && h.Value.First() == "Bearer token");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
 
@@ -82,10 +80,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Raw.Should().Be("invalid");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Raw.ShouldBe("invalid");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -100,10 +98,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Error.Should().Be("exception");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Error.ShouldBe("exception");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -118,10 +116,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
-            response.Error.Should().Be("not found");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.Error.ShouldBe("not found");
         }
 
         [Fact]
@@ -137,11 +135,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-            response.Raw.Should().Be("");
-            response.Error.Should().BeNull();
-            response.Exception.Should().BeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+            response.Raw.ShouldBe("");
+            response.Error.ShouldBeNull();
+            response.Exception.ShouldBeNull();
         }
 
         [Fact]
@@ -160,14 +158,14 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.Claims.Should().BeNull();
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.Claims.ShouldBeNull();
 
             // This is just the literal content of the success_userinfo_response.jwt
             var expectedContent = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2lkZW50aXR5LmV4YW1wbGUuY29tIiwiYXVkIjoiaHR0cHM6Ly9hcHAuZXhhbXBsZS5jb20iLCJzdWIiOiIyNDgyODk3NjEwMDEiLCJuYW1lIjoiSmFuZSBEb2UiLCJnaXZlbl9uYW1lIjoiSmFuZSIsImZhbWlseV9uYW1lIjoiRG9lIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiai5kb2UiLCJlbWFpbCI6ImphbmVkb2VAZXhhbXBsZS5jb20iLCJwaWN0dXJlIjoiaHR0cDovL2V4YW1wbGUuY29tL2phbmVkb2UvbWUuanBnIn0.WmamfT6SSfVrJ6iBqPprRvbjKlQpd_8OcjLSbKbfMTQ";
-            response.Raw.Should().Be(expectedContent);
+            response.Raw.ShouldBe(expectedContent);
         }
     }
 }

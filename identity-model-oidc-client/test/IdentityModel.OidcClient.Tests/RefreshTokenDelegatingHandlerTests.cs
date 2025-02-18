@@ -3,11 +3,8 @@
 
 using System.Collections.Concurrent;
 using System.Net;
-using Duende.IdentityModel.OidcClient.Results;
-using FluentAssertions;
-using FluentAssertions.Extensions;
 using Duende.IdentityModel.Client;
-using Xunit.Abstractions;
+using Duende.IdentityModel.OidcClient.Results;
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -37,13 +34,13 @@ namespace Duende.IdentityModel.OidcClient
 
             using (var client = new TestClient(handlerUnderTest))
             {
-                tokens.Count.Should().Be(1);
+                tokens.Count.ShouldBe(1);
                 await client.SecuredPing();
-                tokens.Count.Should().Be(1);
+                tokens.Count.ShouldBe(1);
                 await client.SecuredPing();
-                tokens.Count.Should().Be(1);
+                tokens.Count.ShouldBe(1);
                 await client.SecuredPing();
-                tokens.Count.Should().Be(2);
+                tokens.Count.ShouldBe(2);
             }
         }
 
@@ -57,10 +54,10 @@ namespace Duende.IdentityModel.OidcClient
             var tokens = new TestTokens(maxCallsPerAccessToken);
 
             var handlerUnderTest = new RefreshTokenDelegatingHandler(
-                new TestableOidcTokenRefreshClient(tokens, 2.Milliseconds()),
+                new TestableOidcTokenRefreshClient(tokens, TimeSpan.FromMilliseconds(2)),
                 tokens.InitialAccessToken,
                 tokens.InitialRefreshToken,
-                innerHandler: new TestServer(tokens, 0.Milliseconds()));
+                innerHandler: new TestServer(tokens, TimeSpan.FromMilliseconds(0)));
 
             using (var client = new TestClient(handlerUnderTest))
             {
@@ -75,7 +72,7 @@ namespace Duende.IdentityModel.OidcClient
                 await Task.WhenAll(tasks);
             }
 
-            tokens.Count.Should().BeGreaterOrEqualTo(logicalThreadCount * callsPerThread / maxCallsPerAccessToken);
+            tokens.Count.ShouldBeGreaterThanOrEqualTo(logicalThreadCount * callsPerThread / maxCallsPerAccessToken);
         }
 
         private class TestClient : IDisposable

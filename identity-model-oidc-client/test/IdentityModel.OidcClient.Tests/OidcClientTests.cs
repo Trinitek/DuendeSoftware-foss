@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Duende.IdentityModel.Client;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -38,7 +38,7 @@ namespace Duende.IdentityModel.OidcClient
                         Func = async r =>
                         {
                             var content = await r.Content.ReadAsStringAsync();
-                            content.Should().Contain($"scope={scope}", content);
+                            content.ShouldContain($"scope={scope}");
                             return new HttpResponseMessage
                                 {
                                     Content = new StringContent($@"{{
@@ -56,7 +56,7 @@ namespace Duende.IdentityModel.OidcClient
 
             var result = await sut.RefreshTokenAsync("test", scope: scope);
 
-            result.Should().NotBeNull();
+            result.ShouldNotBeNull();
         }
 
         class FakeHttpMessageHandler : HttpMessageHandler

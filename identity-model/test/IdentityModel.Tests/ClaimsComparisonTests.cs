@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Security.Claims;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel
 {
@@ -34,27 +34,27 @@ namespace Duende.IdentityModel
         {
             var hashSet = new HashSet<Claim>(_claims, new ClaimComparer());
 
-            hashSet.Count.Should().Be(4);
+            hashSet.Count.ShouldBe(4);
 
             var item = hashSet.First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("value");
+            item.Issuer.ShouldBe("issuer1");
 
             item = hashSet.Skip(1).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("Value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("Value");
+            item.Issuer.ShouldBe("issuer1");
 
             item = hashSet.Skip(2).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("value");
-            item.Issuer.Should().Be("issuer2");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("value");
+            item.Issuer.ShouldBe("issuer2");
 
             item = hashSet.Skip(3).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("Value");
-            item.Issuer.Should().Be("issuer2");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("Value");
+            item.Issuer.ShouldBe("issuer2");
 
         }
 
@@ -63,27 +63,27 @@ namespace Duende.IdentityModel
         {
             var hashSet = new HashSet<Claim>(_claims, new ClaimComparer(new ClaimComparer.Options { IgnoreValueCase = false }));
 
-            hashSet.Count.Should().Be(4);
+            hashSet.Count.ShouldBe(4);
 
             var item = hashSet.First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("value");
+            item.Issuer.ShouldBe("issuer1");
 
             item = hashSet.Skip(1).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("Value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("Value");
+            item.Issuer.ShouldBe("issuer1");
 
             item = hashSet.Skip(2).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("value");
-            item.Issuer.Should().Be("issuer2");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("value");
+            item.Issuer.ShouldBe("issuer2");
 
             item = hashSet.Skip(3).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("Value");
-            item.Issuer.Should().Be("issuer2");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("Value");
+            item.Issuer.ShouldBe("issuer2");
         }
 
         [Fact]
@@ -91,17 +91,17 @@ namespace Duende.IdentityModel
         {
             var hashSet = new HashSet<Claim>(_claims, new ClaimComparer(new ClaimComparer.Options { IgnoreIssuer = true }));
 
-            hashSet.Count.Should().Be(2);
+            hashSet.Count.ShouldBe(2);
 
             var item = hashSet.First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("value");
+            item.Issuer.ShouldBe("issuer1");
 
             item = hashSet.Skip(1).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("Value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("Value");
+            item.Issuer.ShouldBe("issuer1");
         }
 
         [Fact]
@@ -109,17 +109,17 @@ namespace Duende.IdentityModel
         {
             var hashSet = new HashSet<Claim>(_claims, new ClaimComparer(new ClaimComparer.Options { IgnoreValueCase = false, IgnoreIssuer = true }));
 
-            hashSet.Count.Should().Be(2);
+            hashSet.Count.ShouldBe(2);
 
             var item = hashSet.First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("value");
+            item.Issuer.ShouldBe("issuer1");
 
             item = hashSet.Skip(1).First();
-            item.Type.Should().Be("claim_type1");
-            item.Value.Should().Be("Value");
-            item.Issuer.Should().Be("issuer1");
+            item.Type.ShouldBe("claim_type1");
+            item.Value.ShouldBe("Value");
+            item.Issuer.ShouldBe("issuer1");
         }
     }
 }

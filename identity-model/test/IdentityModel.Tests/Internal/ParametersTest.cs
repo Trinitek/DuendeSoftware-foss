@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.CodeDom;
 using Duende.IdentityModel.Client;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.Internal
 {
@@ -18,8 +19,9 @@ namespace Duende.IdentityModel.Internal
         [InlineData(null)]
         public void AddOptional_with_missing_key_should_fail(string missingKey)
         {
-            Action act = () => Parameters.AddOptional(missingKey, Value);
-            act.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("key");
+            var act       = () => Parameters.AddOptional(missingKey, Value);
+            var    exception = act.ShouldThrow<ArgumentNullException>();
+            exception.ParamName.ShouldBe("key");
         }
 
         [Theory]
@@ -28,14 +30,14 @@ namespace Duende.IdentityModel.Internal
         public void AddOptional_with_empty_value_should_not_be_added(string emptyValue)
         {
             Parameters.AddOptional(Key, emptyValue);
-            Parameters.Should().BeEmpty();
+            Parameters.ShouldBeEmpty();
         }
 
         [Fact]
         public void AddOptional_with_key_and_value_should_add()
         {
             Parameters.AddOptional(Key, Value);
-            Parameters.Should().HaveCount(1);
+            Parameters.Count.ShouldBe(1);
         }
 
         [Theory]
@@ -44,8 +46,9 @@ namespace Duende.IdentityModel.Internal
         public void AddOptional_with_duplicate_key_should_fail(string value)
         {
             Parameters.AddOptional(Key, Value);
-            Action act = () => Parameters.AddOptional(Key, value);
-            act.Should().Throw<InvalidOperationException>().And.Message.Should().Be($"Duplicate parameter: {Key}");
+            var act = () => Parameters.AddOptional(Key, value);
+            var exception = act.ShouldThrow<InvalidOperationException>();
+            exception.Message.ShouldBe($"Duplicate parameter: {Key}");
         }
 
         [Theory]
@@ -55,7 +58,7 @@ namespace Duende.IdentityModel.Internal
         {
             Parameters.Add(Key, Value);
             Parameters.AddOptional(Key, emptyValue);
-            Parameters.Should().HaveCount(1);
+            Parameters.Count.ShouldBe(1);
         }
 
         [Fact]
@@ -63,8 +66,8 @@ namespace Duende.IdentityModel.Internal
         {
             Parameters.Add(Key, Value);
             Parameters.AddOptional(Key, "new value", allowDuplicates: true);
-            Parameters.Should().HaveCount(2);
-            Parameters.GetValues(Key).Should().HaveCount(2);
+            Parameters.Count.ShouldBe(2);
+            Parameters.GetValues(Key).Count().ShouldBe(2);
         }
 
         [Theory]
@@ -79,8 +82,8 @@ namespace Duende.IdentityModel.Internal
             
             parameters.AddOptional(Key, emptyValue, allowDuplicates: true);
 
-            parameters.Should().HaveCount(1);
-            parameters.GetValues(Key).Should().HaveCount(1);
+            parameters.Count.ShouldBe(1);
+            parameters.GetValues(Key).Count().ShouldBe(1);
         }
 
         [Theory]
@@ -88,8 +91,9 @@ namespace Duende.IdentityModel.Internal
         [InlineData(null)]
         public void AddRequired_with_missing_key_should_fail(string missingKey)
         {
-            Action act = () => Parameters.AddRequired(missingKey, Value);
-            act.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("key");
+            var act = () => Parameters.AddRequired(missingKey, Value);
+            var exception = act.ShouldThrow<ArgumentNullException>();
+            exception.ParamName.ShouldBe("key");
         }
 
         [Theory]
@@ -97,15 +101,16 @@ namespace Duende.IdentityModel.Internal
         [InlineData(null)]
         public void AddRequired_with_empty_value_should_fail(string emptyValue)
         {
-            Action act = () => Parameters.AddRequired(Key, emptyValue);
-            act.Should().Throw<ArgumentException>().And.ParamName.Should().Be(Key);
+            var act = () => Parameters.AddRequired(Key, emptyValue);
+            var exception = act.ShouldThrow<ArgumentException>();
+            exception.ParamName.ShouldBe(Key);
         }
 
         [Fact]
         public void AddRequired_with_key_and_value_should_add()
         {
             Parameters.AddRequired(Key, Value);
-            Parameters.Should().HaveCount(1);
+            Parameters.Count.ShouldBe(1);
         }
 
         [Fact]
@@ -116,7 +121,7 @@ namespace Duende.IdentityModel.Internal
             parameters.AddRequired(Key, null);
             parameters.AddRequired(Key, "");
 
-            parameters.Should().HaveCount(1);
+            parameters.Count.ShouldBe(1);
         }
 
         [Theory]
@@ -127,7 +132,7 @@ namespace Duende.IdentityModel.Internal
             var parameters = new Parameters();
             
             parameters.AddRequired(Key, emptyValue, allowEmptyValue: true);
-            parameters.Should().HaveCount(1);
+            parameters.Count.ShouldBe(1);
         }
 
         [Theory]
@@ -144,8 +149,8 @@ namespace Duende.IdentityModel.Internal
             };
             parameters.AddRequired(Key, emptyValue, allowDuplicates: true, allowEmptyValue: true);
 
-            parameters.Should().HaveCount(2);
-            parameters[Key].Should().HaveCount(2);
+            parameters.Count.ShouldBe(2);
+            parameters[Key].Count().ShouldBe(2);
         }
 
         [Fact]
@@ -156,8 +161,9 @@ namespace Duende.IdentityModel.Internal
                 { Key, Value}
             };
 
-            Action act = () => parameters.AddRequired(Key, "new value");
-            act.Should().Throw<InvalidOperationException>().And.Message.Should().Be($"Duplicate parameter: {Key}");
+            var act = () => parameters.AddRequired(Key, "new value");
+            var exception = act.ShouldThrow<InvalidOperationException>();
+            exception.Message.ShouldBe($"Duplicate parameter: {Key}");
         }
 
         [Fact]
@@ -166,7 +172,7 @@ namespace Duende.IdentityModel.Internal
             Parameters.AddRequired(Key, Value);
             Parameters.AddRequired(Key, Value);
 
-            Parameters.Should().HaveCount(1);
+            Parameters.Count.ShouldBe(1);
         }
 
         [Theory]
@@ -176,7 +182,7 @@ namespace Duende.IdentityModel.Internal
         {
             Parameters.Add(Key, Value);
             Parameters.AddRequired(Key, emptyValue);
-            Parameters.Should().HaveCount(1);
+            Parameters.Count.ShouldBe(1);
         }
         
         [Fact]
@@ -189,7 +195,7 @@ namespace Duende.IdentityModel.Internal
             parameters.Add(key, value);
             parameters.Add(key, value);
 
-            parameters.Should().HaveCount(2);
+            parameters.Count.ShouldBe(2);
         }
         
         [Fact]
@@ -202,7 +208,7 @@ namespace Duende.IdentityModel.Internal
             parameters.Add(key, value);
             parameters.Add(key, value, ParameterReplaceBehavior.Single);
 
-            parameters.Should().HaveCount(1);
+            parameters.Count.ShouldBe(1);
         }
         
         [Fact]
@@ -215,7 +221,7 @@ namespace Duende.IdentityModel.Internal
             parameters.Add(key, value);
             parameters.Add(key, value, ParameterReplaceBehavior.All);
 
-            parameters.Should().HaveCount(1);
+            parameters.Count.ShouldBe(1);
         }
         
         [Fact]
@@ -227,8 +233,8 @@ namespace Duende.IdentityModel.Internal
             parameters.Add(key, "value1");
             parameters.Add(key, "value2");
             
-            Action act = () => parameters.Add(key,"value3", ParameterReplaceBehavior.Single);
-            act.Should().Throw<InvalidOperationException>();
+            var act = () => parameters.Add(key,"value3", ParameterReplaceBehavior.Single);
+            act.ShouldThrow<InvalidOperationException>();
         }
     }
 }

@@ -3,7 +3,6 @@
 
 using System.Text;
 using Duende.IdentityModel.Client;
-using FluentAssertions;
 
 namespace Duende.IdentityModel
 {
@@ -22,8 +21,8 @@ namespace Duende.IdentityModel
             var header = new BasicAuthenticationOAuthHeaderValue(id, secret);
             DecodeOAuthHeader(header.Parameter, out var decodedId, out var decodedSecret);
 
-            decodedId.Should().Be(id);
-            decodedSecret.Should().Be(secret);
+            decodedId.ShouldBe(id);
+            decodedSecret.ShouldBe(secret);
         }
 
         private void DecodeOAuthHeader(string value, out string id, out string secret)

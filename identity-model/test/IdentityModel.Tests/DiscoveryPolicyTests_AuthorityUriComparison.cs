@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net.Http;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel
 {
@@ -46,7 +45,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -65,11 +64,11 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
-            disco.ErrorType.Should().Be(ResponseErrorType.Exception);
-            disco.Error.Should().StartWith("Error connecting to");
-            disco.Error.Should().EndWith("HTTPS required.");
+            disco.IsError.ShouldBeTrue();
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
+            disco.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            disco.Error.ShouldStartWith("Error connecting to");
+            disco.Error.ShouldEndWith("HTTPS required.");
         }
 
         [Fact]
@@ -87,7 +86,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Theory]
@@ -109,7 +108,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
 
@@ -128,10 +127,10 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
-            disco.ErrorType.Should().Be(ResponseErrorType.PolicyViolation);
-            disco.Error.Should().StartWith("Issuer name does not match authority");
+            disco.IsError.ShouldBeTrue();
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
+            disco.ErrorType.ShouldBe(ResponseErrorType.PolicyViolation);
+            disco.Error.ShouldStartWith("Issuer name does not match authority");
         }
 
         [Fact]
@@ -162,7 +161,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -182,7 +181,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -203,7 +202,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -223,7 +222,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
+            disco.IsError.ShouldBeTrue();
         }
 
         [Fact]
@@ -245,10 +244,10 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
-            disco.ErrorType.Should().Be(ResponseErrorType.PolicyViolation);
-            disco.Error.Should().StartWith("Endpoint does not use HTTPS");
+            disco.IsError.ShouldBeTrue();
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
+            disco.ErrorType.ShouldBe(ResponseErrorType.PolicyViolation);
+            disco.Error.ShouldStartWith("Endpoint does not use HTTPS");
         }
 
         [Theory]
@@ -272,12 +271,12 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
-            disco.ErrorType.Should().Be(ResponseErrorType.PolicyViolation);
-            disco.Error.Should().StartWith("Invalid base address for endpoint");
-            disco.Error.Should().Contain(endpointBase);
-            disco.Error.Should().Contain(authority);
+            disco.IsError.ShouldBeTrue();
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
+            disco.ErrorType.ShouldBe(ResponseErrorType.PolicyViolation);
+            disco.Error.ShouldStartWith("Invalid base address for endpoint");
+            disco.Error.ShouldContain(endpointBase);
+            disco.Error.ShouldContain(authority);
         }
 
         [Theory]
@@ -306,7 +305,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Theory]
@@ -333,10 +332,10 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
-            disco.ErrorType.Should().Be(ResponseErrorType.PolicyViolation);
-            disco.Error.Should().StartWith("Endpoint is on a different host than authority");
+            disco.IsError.ShouldBeTrue();
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
+            disco.ErrorType.ShouldBe(ResponseErrorType.PolicyViolation);
+            disco.Error.ShouldStartWith("Endpoint is on a different host than authority");
         }
 
         [Theory]
@@ -368,7 +367,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -390,7 +389,7 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -412,10 +411,10 @@ namespace Duende.IdentityModel
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
-            disco.ErrorType.Should().Be(ResponseErrorType.PolicyViolation);
-            disco.Error.Should().StartWith("Endpoint does not use HTTPS");
+            disco.IsError.ShouldBeTrue();
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
+            disco.ErrorType.ShouldBe(ResponseErrorType.PolicyViolation);
+            disco.Error.ShouldStartWith("Endpoint does not use HTTPS");
         }
     }
 }

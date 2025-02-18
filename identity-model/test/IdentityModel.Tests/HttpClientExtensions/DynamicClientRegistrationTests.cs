@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.HttpClientExtensions
 {
@@ -36,20 +34,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(2);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(2);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
         [Fact]
@@ -68,23 +66,21 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 }
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.Created);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.Created);
 
-            response.ClientId.Should().Be("s6BhdRkqt3");
-            response.ClientSecret.Should().Be("ZJYCqe3GGRvdrudKyZS0XhGv_Z45DuKhCUk0gBR1vZk");
-            response.ClientSecretExpiresAt.Should().Be(1577858400);
-            response.ClientIdIssuedAt.Should().NotHaveValue();
-            response.RegistrationAccessToken.Should().Be("this.is.an.access.token.value.ffx83");
-            response.RegistrationClientUri.Should()
-                .Be("https://server.example.com/connect/register?client_id=s6BhdRkqt3");
+            response.ClientId.ShouldBe("s6BhdRkqt3");
+            response.ClientSecret.ShouldBe("ZJYCqe3GGRvdrudKyZS0XhGv_Z45DuKhCUk0gBR1vZk");
+            response.ClientSecretExpiresAt.ShouldBe(1577858400);
+            response.ClientIdIssuedAt.HasValue.ShouldBeFalse();
+            response.RegistrationAccessToken.ShouldBe("this.is.an.access.token.value.ffx83");
+            response.RegistrationClientUri.ShouldBe("https://server.example.com/connect/register?client_id=s6BhdRkqt3");
             // Spec requires that a software statement be echoed back unchanged
-            response.SoftwareStatement.Should().Be(SoftwareStatement);
+            response.SoftwareStatement.ShouldBe(SoftwareStatement);
 
             response.Json?.TryGetString(OidcConstants.ClientMetadata.TokenEndpointAuthenticationMethod)
-                .Should()
-                .Be(OidcConstants.EndpointAuthenticationMethods.BasicAuthentication);
+                .ShouldBe(OidcConstants.EndpointAuthenticationMethods.BasicAuthentication);
         }
 
         [Fact]
@@ -100,10 +96,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Document = new DynamicClientRegistrationDocument()
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Raw.Should().Be("invalid");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Raw.ShouldBe("invalid");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -118,10 +114,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Document = new DynamicClientRegistrationDocument()
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Error.Should().Be("exception");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Error.ShouldBe("exception");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -136,10 +132,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Document = new DynamicClientRegistrationDocument()
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
-            response.Error.Should().Be("not found");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.Error.ShouldBe("not found");
         }
 
         [Fact]
@@ -155,12 +151,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Document = new DynamicClientRegistrationDocument()
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-            response.Error.Should().Be("invalid_redirect_uri");
-            response.ErrorDescription.Should().Be("One or more redirect_uri values are invalid");
-            response.TryGet("custom").Should().Be("custom");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+            response.Error.ShouldBe("invalid_redirect_uri");
+            response.ErrorDescription.ShouldBe("One or more redirect_uri values are invalid");
+            response.TryGet("custom").ShouldBe("custom");
         }
 
         [Fact]
@@ -172,7 +168,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Document = JsonSerializer.Deserialize<DynamicClientRegistrationDocument>(
                     "{\"extension\":\"data\"}")
             };
-            request.Document.Extensions.Should().NotBeEmpty();
+            request.Document.Extensions.ShouldNotBeEmpty();
 
             var document = File.ReadAllText(FileName.Create("success_registration_response.json"));
             var handler = new NetworkHandler(document, HttpStatusCode.Created);
@@ -181,7 +177,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var response = await client.RegisterClientAsync(request);
             
             // Mostly we just want to make sure that serialization didn't throw
-            response.Should().NotBeNull();
+            response.ShouldNotBeNull();
         }
     }
 }

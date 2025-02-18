@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel.HttpClientExtensions
@@ -33,20 +31,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(2);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(2);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
         [Fact]
@@ -62,9 +60,9 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
         }
 
         [Fact]
@@ -82,16 +80,16 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var response = await client.RevokeTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
 
             // repeat
             response = await client.RevokeTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
         }
 
         [Fact]
@@ -108,10 +106,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-            response.Error.Should().Be("error");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+            response.Error.ShouldBe("error");
         }
 
         [Fact]
@@ -128,10 +126,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Raw.Should().Be("invalid");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Raw.ShouldBe("invalid");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -147,10 +145,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Error.Should().Be("exception");
-            response.Exception.Should().NotBeNull();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Error.ShouldBe("exception");
+            response.Exception.ShouldNotBeNull();
         }
 
         [Fact]
@@ -166,10 +164,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 ClientId = "client"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
-            response.Error.Should().Be("not found");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.Error.ShouldBe("not found");
         }
 
         [Fact]
@@ -192,15 +190,15 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             // check request
             var fields = QueryHelpers.ParseQuery(handler.Body);
-            fields.Count.Should().Be(2);
+            fields.Count.ShouldBe(2);
             
-            fields["token"].First().Should().Be("token");
-            fields["foo"].First().Should().Be("bar");
+            fields["token"].First().ShouldBe("token");
+            fields["foo"].First().ShouldBe("bar");
 
             // check response
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
         }
     }
 }

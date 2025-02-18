@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using Duende.IdentityModel.OidcClient.Browser;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
+using Duende.IdentityModel.OidcClient.Browser;
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -23,16 +22,16 @@ namespace Duende.IdentityModel.OidcClient
             var client = new AuthorizeClient(options);
             var parameters = client.CreateAuthorizeParameters("state", "code_challenge", null);
 
-            parameters.Should().HaveCount(9);
-            parameters.GetValues("client_id").Single().Should().Be("client_id");
-            parameters.GetValues("scope").Single().Should().Be("openid");
-            parameters.GetValues("resource").First().Should().Be("urn:resource1");
-            parameters.GetValues("resource").Skip(1).First().Should().Be("urn:resource2");
-            parameters.GetValues("redirect_uri").Single().Should().Be("http://redirect");
-            parameters.GetValues("response_type").Single().Should().Be("code");
-            parameters.GetValues("state").Single().Should().Be("state");
-            parameters.GetValues("code_challenge").Single().Should().Be("code_challenge");
-            parameters.GetValues("code_challenge_method").Single().Should().Be("S256");
+            parameters.Count.ShouldBe(9);
+            parameters.GetValues("client_id").Single().ShouldBe("client_id");
+            parameters.GetValues("scope").Single().ShouldBe("openid");
+            parameters.GetValues("resource").First().ShouldBe("urn:resource1");
+            parameters.GetValues("resource").Skip(1).First().ShouldBe("urn:resource2");
+            parameters.GetValues("redirect_uri").Single().ShouldBe("http://redirect");
+            parameters.GetValues("response_type").Single().ShouldBe("code");
+            parameters.GetValues("state").Single().ShouldBe("state");
+            parameters.GetValues("code_challenge").Single().ShouldBe("code_challenge");
+            parameters.GetValues("code_challenge_method").Single().ShouldBe("S256");
         }
 
         [Fact]
@@ -53,19 +52,19 @@ namespace Duende.IdentityModel.OidcClient
             var client = new AuthorizeClient(options);
             var parameters = client.CreateAuthorizeParameters("state", "code_challenge", frontChannel);
 
-            parameters.Should().HaveCount(9);
-            parameters.GetValues("client_id").Single().Should().Be("client_id2");
-            parameters.GetValues("scope").Single().Should().Be("openid extra");
-            parameters.GetValues("redirect_uri").Single().Should().Be("http://redirect2");
-            parameters.GetValues("response_type").Single().Should().Be("code");
-            parameters.GetValues("state").Single().Should().Be("state");
-            parameters.GetValues("code_challenge").Single().Should().Be("code_challenge");
-            parameters.GetValues("code_challenge_method").Single().Should().Be("S256");
+            parameters.Count.ShouldBe(9);
+            parameters.GetValues("client_id").Single().ShouldBe("client_id2");
+            parameters.GetValues("scope").Single().ShouldBe("openid extra");
+            parameters.GetValues("redirect_uri").Single().ShouldBe("http://redirect2");
+            parameters.GetValues("response_type").Single().ShouldBe("code");
+            parameters.GetValues("state").Single().ShouldBe("state");
+            parameters.GetValues("code_challenge").Single().ShouldBe("code_challenge");
+            parameters.GetValues("code_challenge_method").Single().ShouldBe("S256");
 
             var resources = parameters.GetValues("resource").ToList();
-            resources.Should().HaveCount(2);
-            resources[0].Should().Be("urn:resource1");
-            resources[1].Should().Be("urn:resource2");
+            resources.Count.ShouldBe(2);
+            resources[0].ShouldBe("urn:resource1");
+            resources[1].ShouldBe("urn:resource2");
         }
 
         [Fact]
@@ -93,8 +92,8 @@ namespace Duende.IdentityModel.OidcClient
 
             var response = await client.AuthorizeAsync(new AuthorizeRequest());
 
-            response.Error.Should().Be("Something terrible happened");
-            response.ErrorDescription.Should().Be("Explaining the terrible error...");
+            response.Error.ShouldBe("Something terrible happened");
+            response.ErrorDescription.ShouldBe("Explaining the terrible error...");
         }
     }
 }

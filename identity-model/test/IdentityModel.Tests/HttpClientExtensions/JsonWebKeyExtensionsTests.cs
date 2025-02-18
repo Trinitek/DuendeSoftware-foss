@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.HttpClientExtensions
 {
@@ -52,20 +50,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Get);
-            httpRequest.RequestUri.Should().Be(new Uri(_endpoint));
-            httpRequest.Content.Should().BeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Get);
+            httpRequest.RequestUri.ShouldBe(new Uri(_endpoint));
+            httpRequest.Content.ShouldBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(2);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(2);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
         [Fact]
@@ -78,7 +76,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var jwk = await client.GetJsonWebKeySetAsync();
 
-            jwk.IsError.Should().BeFalse();
+            jwk.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -88,7 +86,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var jwk = await client.GetJsonWebKeySetAsync(_endpoint);
 
-            jwk.IsError.Should().BeFalse();
+            jwk.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -102,11 +100,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var jwk = await client.GetJsonWebKeySetAsync();
 
-            jwk.IsError.Should().BeTrue();
-            jwk.ErrorType.Should().Be(ResponseErrorType.Http);
-            jwk.Error.Should().StartWith("Error connecting to");
-            jwk.Error.Should().EndWith("not found");
-            jwk.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
+            jwk.IsError.ShouldBeTrue();
+            jwk.ErrorType.ShouldBe(ResponseErrorType.Http);
+            jwk.Error.ShouldStartWith("Error connecting to");
+            jwk.Error.ShouldEndWith("not found");
+            jwk.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
         }
 
         [Fact]
@@ -117,10 +115,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
             var client = new HttpClient(handler);
             var jwk = await client.GetJsonWebKeySetAsync(_endpoint);
 
-            jwk.IsError.Should().BeTrue();
-            jwk.ErrorType.Should().Be(ResponseErrorType.Exception);
-            jwk.Error.Should().StartWith("Error connecting to");
-            jwk.Error.Should().EndWith("error.");
+            jwk.IsError.ShouldBeTrue();
+            jwk.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            jwk.Error.ShouldStartWith("Error connecting to");
+            jwk.Error.ShouldEndWith("error.");
         }
 
         [Fact]
@@ -133,8 +131,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var jwk = await client.GetJsonWebKeySetAsync();
 
-            jwk.IsError.Should().BeFalse();
-            jwk.KeySet.Should().NotBeNull();
+            jwk.IsError.ShouldBeFalse();
+            jwk.KeySet.ShouldNotBeNull();
         }
 
         [Fact]
@@ -148,12 +146,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var jwk = await client.GetJsonWebKeySetAsync();
 
-            jwk.IsError.Should().BeTrue();
-            jwk.ErrorType.Should().Be(ResponseErrorType.Http);
-            jwk.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            jwk.Error.Should().Contain("Internal Server Error");
-            jwk.Raw.Should().Be("not_json");
-            jwk.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
+            jwk.IsError.ShouldBeTrue();
+            jwk.ErrorType.ShouldBe(ResponseErrorType.Http);
+            jwk.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            jwk.Error.ShouldContain("Internal Server Error");
+            jwk.Raw.ShouldBe("not_json");
+            jwk.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
         }
 
         [Fact]
@@ -174,13 +172,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var jwk = await client.GetJsonWebKeySetAsync();
 
-            jwk.IsError.Should().BeTrue();
-            jwk.ErrorType.Should().Be(ResponseErrorType.Http);
-            jwk.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            jwk.Error.Should().Contain("Internal Server Error");
+            jwk.IsError.ShouldBeTrue();
+            jwk.ErrorType.ShouldBe(ResponseErrorType.Http);
+            jwk.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            jwk.Error.ShouldContain("Internal Server Error");
 
-            jwk.Json?.TryGetString("foo").Should().Be("foo");
-            jwk.Json?.TryGetString("bar").Should().Be("bar");
+            jwk.Json?.TryGetString("foo").ShouldBe("foo");
+            jwk.Json?.TryGetString("bar").ShouldBe("bar");
         }
     }
 }

@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Duende.IdentityModel.Client;
-using FluentAssertions;
 
 namespace Duende.IdentityModel
 {
@@ -15,8 +14,8 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeTrue();
-            response.Error.Should().Be("foo");
+            response.IsError.ShouldBeTrue();
+            response.Error.ShouldBe("foo");
         }
 
         [Fact]
@@ -26,8 +25,8 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeTrue();
-            response.Error.Should().Be("foo");
+            response.IsError.ShouldBeTrue();
+            response.Error.ShouldBe("foo");
         }
 
         [Fact]
@@ -37,8 +36,8 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeTrue();
-            response.Error.Should().Be("foo");
+            response.IsError.ShouldBeTrue();
+            response.Error.ShouldBe("foo");
         }
 
         [Fact]
@@ -48,11 +47,11 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeFalse();
-            response.Code.Should().Be("foo");
+            response.IsError.ShouldBeFalse();
+            response.Code.ShouldBe("foo");
 
-            response.Values["sid"].Should().Be("123");
-            response.TryGet("sid").Should().Be("123");
+            response.Values["sid"].ShouldBe("123");
+            response.TryGet("sid").ShouldBe("123");
         }
 
         [Fact]
@@ -62,11 +61,11 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeFalse();
-            response.AccessToken.Should().Be("foo");
+            response.IsError.ShouldBeFalse();
+            response.AccessToken.ShouldBe("foo");
 
-            response.Values["sid"].Should().Be("123");
-            response.TryGet("sid").Should().Be("123");
+            response.Values["sid"].ShouldBe("123");
+            response.TryGet("sid").ShouldBe("123");
         }
 
         [Fact]
@@ -76,11 +75,11 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeFalse();
-            response.AccessToken.Should().Be("foo");
+            response.IsError.ShouldBeFalse();
+            response.AccessToken.ShouldBe("foo");
 
-            response.Values["sid"].Should().Be("123");
-            response.TryGet("sid").Should().Be("123");
+            response.Values["sid"].ShouldBe("123");
+            response.TryGet("sid").ShouldBe("123");
         }
 
         [Fact]
@@ -90,11 +89,11 @@ namespace Duende.IdentityModel
 
             var response = new AuthorizeResponse(url);
 
-            response.IsError.Should().BeFalse();
-            response.AccessToken.Should().Be("foo");
+            response.IsError.ShouldBeFalse();
+            response.AccessToken.ShouldBe("foo");
 
-            response.Values["sid"].Should().Be("123");
-            response.TryGet("sid").Should().Be("123");
+            response.Values["sid"].ShouldBe("123");
+            response.TryGet("sid").ShouldBe("123");
         }
 
         [Fact]
@@ -103,11 +102,11 @@ namespace Duende.IdentityModel
             const string form = "id_token=foo&code=bar&scope=baz&session_state=quux";
             var response = new AuthorizeResponse(form);
 
-            response.IsError.Should().BeFalse();
-            response.IdentityToken.Should().Be("foo");
-            response.Code.Should().Be("bar");
-            response.Scope.Should().Be("baz");
-            response.Values["session_state"].Should().Be("quux");
+            response.IsError.ShouldBeFalse();
+            response.IdentityToken.ShouldBe("foo");
+            response.Code.ShouldBe("bar");
+            response.Scope.ShouldBe("baz");
+            response.Values["session_state"].ShouldBe("quux");
         }
     }
 }

@@ -2,10 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Net;
-using Duende.IdentityModel.OidcClient.Infrastructure;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Jwk;
+using Duende.IdentityModel.OidcClient.Infrastructure;
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -16,9 +15,9 @@ namespace Duende.IdentityModel.OidcClient
         {
             OidcClientOptions options = null;
 
-            Action act = () => new Duende.IdentityModel.OidcClient.OidcClient(options);
+            Action act = () => _ = new OidcClient(options);
 
-            act.Should().Throw<ArgumentNullException>();
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Fact]
@@ -26,9 +25,10 @@ namespace Duende.IdentityModel.OidcClient
         {
             var options = new OidcClientOptions();
 
-            Action act = () => new Duende.IdentityModel.OidcClient.OidcClient(options);
+            Action act = () => _ = new OidcClient(options);
 
-            act.Should().Throw<ArgumentException>().Where(e => e.Message.StartsWith("No authority specified"));
+            var exception = act.ShouldThrow<ArgumentException>();
+            exception.Message.ShouldStartWith("No authority specified");
         }
 
         [Fact]
@@ -45,11 +45,11 @@ namespace Duende.IdentityModel.OidcClient
                 }
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().NotThrowAsync();
+            await act.ShouldNotThrowAsync();
         }
 
         [Fact]
@@ -66,11 +66,12 @@ namespace Duende.IdentityModel.OidcClient
                 }
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().ThrowAsync<InvalidOperationException>().Where(e => e.Message.Equals("Issuer name is missing in provider information"));
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldStartWith("Issuer name is missing in provider information");
         }
 
         [Fact]
@@ -87,11 +88,12 @@ namespace Duende.IdentityModel.OidcClient
                 }
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().ThrowAsync<InvalidOperationException>().Where(e => e.Message.Equals("Authorize endpoint is missing in provider information"));
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldBe("Authorize endpoint is missing in provider information");
         }
 
         [Fact]
@@ -108,11 +110,12 @@ namespace Duende.IdentityModel.OidcClient
                 }
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().ThrowAsync<InvalidOperationException>().Where(e => e.Message.Equals("Token endpoint is missing in provider information"));
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldBe("Token endpoint is missing in provider information");
         }
 
         [Fact]
@@ -129,11 +132,12 @@ namespace Duende.IdentityModel.OidcClient
                 }
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().ThrowAsync<InvalidOperationException>().Where(e => e.Message.Equals("Key set is missing in provider information"));
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldBe("Key set is missing in provider information");
         }
 
         [Fact]
@@ -146,11 +150,12 @@ namespace Duende.IdentityModel.OidcClient
                 BackchannelHandler = new NetworkHandler(new Exception("error"))
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().ThrowAsync<InvalidOperationException>().Where(e => e.Message.Equals("Error loading discovery document: Error connecting to https://authority/.well-known/openid-configuration. error."));
+            var exception =  await act.ShouldThrowAsync<InvalidOperationException>();
+            exception.Message.ShouldBe("Error loading discovery document: Error connecting to https://authority/.well-known/openid-configuration. error.");
         }
 
         [Fact]
@@ -163,11 +168,12 @@ namespace Duende.IdentityModel.OidcClient
                 BackchannelHandler = new NetworkHandler(HttpStatusCode.NotFound, "not found")
             };
 
-            var client = new Duende.IdentityModel.OidcClient.OidcClient(options);
+            var client = new OidcClient(options);
 
             var act = async () => { await client.EnsureProviderInformationAsync(CancellationToken.None); };
 
-            await act.Should().ThrowAsync<InvalidOperationException>().Where(e => e.Message.Equals("Error loading discovery document: Error connecting to https://authority/.well-known/openid-configuration: not found"));
+            var exception = await act.ShouldThrowAsync<InvalidOperationException>(); 
+            exception.Message.ShouldBe("Error loading discovery document: Error connecting to https://authority/.well-known/openid-configuration: not found");
         }
 
         [Fact]
@@ -179,8 +185,8 @@ namespace Duende.IdentityModel.OidcClient
             };
 
             var result = await options.GetClientAssertionAsync();
-            result.Type.Should().Be("test");
-            result.Value.Should().Be("expected");
+            result.Type.ShouldBe("test");
+            result.Value.ShouldBe("expected");
         }
     }
 }

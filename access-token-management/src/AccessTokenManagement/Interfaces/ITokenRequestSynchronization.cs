@@ -4,7 +4,8 @@
 namespace Duende.AccessTokenManagement;
 
 /// <summary>
-/// Service to provide synchronization to token endpoint requests
+/// Service to provide synchronization to token endpoint requests. When concurrent requests are made for the same token, this service
+/// de-duplicates the requests and ensures that only one request is made to the token endpoint.
 /// </summary>
 public interface ITokenRequestSynchronization
 {

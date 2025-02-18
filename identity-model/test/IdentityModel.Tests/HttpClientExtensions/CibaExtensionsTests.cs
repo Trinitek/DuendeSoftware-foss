@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel.HttpClientExtensions
@@ -51,53 +49,53 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(3);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(3);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
             
             var fields = QueryHelpers.ParseQuery(handler.Body);
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Scope, out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Scope, out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.AcrValues, out var acr_values).Should().BeTrue();
-            acr_values.First().Should().Be("acr_values");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.AcrValues, out var acr_values).ShouldBeTrue();
+            acr_values.First().ShouldBe("acr_values");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.BindingMessage, out var binding_message).Should().BeTrue();
-            binding_message.First().Should().Be("binding_message");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.BindingMessage, out var binding_message).ShouldBeTrue();
+            binding_message.First().ShouldBe("binding_message");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.ClientNotificationToken, out var client_notification_token).Should().BeTrue();
-            client_notification_token.First().Should().Be("client_notification_token");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.ClientNotificationToken, out var client_notification_token).ShouldBeTrue();
+            client_notification_token.First().ShouldBe("client_notification_token");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.UserCode, out var user_code).Should().BeTrue();
-            user_code.First().Should().Be("user_code");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.UserCode, out var user_code).ShouldBeTrue();
+            user_code.First().ShouldBe("user_code");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.RequestedExpiry, out var request_expiry).Should().BeTrue();
-            int.Parse(request_expiry.First()).Should().Be(1);
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.RequestedExpiry, out var request_expiry).ShouldBeTrue();
+            int.Parse(request_expiry.First()).ShouldBe(1);
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.IdTokenHint, out var id_token_hint).Should().BeTrue();
-            id_token_hint.First().Should().Be("id_token_hint");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.IdTokenHint, out var id_token_hint).ShouldBeTrue();
+            id_token_hint.First().ShouldBe("id_token_hint");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHintToken, out var login_hint_token).Should().BeTrue();
-            login_hint_token.First().Should().Be("login_hint_token");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHintToken, out var login_hint_token).ShouldBeTrue();
+            login_hint_token.First().ShouldBe("login_hint_token");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHint, out var login_hint).Should().BeTrue();
-            login_hint.First().Should().Be("login_hint");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHint, out var login_hint).ShouldBeTrue();
+            login_hint.First().ShouldBe("login_hint");
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Resource, out var resource).Should().BeTrue();
-            resource.Count.Should().Be(2);
-            resource.First().Should().Be("resource1");
-            resource.Skip(1).First().Should().Be("resource2");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Resource, out var resource).ShouldBeTrue();
+            resource.Count.ShouldBe(2);
+            resource.First().ShouldBe("resource1");
+            resource.Skip(1).First().ShouldBe("resource2");
         }
         
         [Fact]
@@ -139,35 +137,35 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(3);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(3);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
             
             var fields = QueryHelpers.ParseQuery(handler.Body);
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Scope, out var scope).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.AcrValues, out var _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.BindingMessage, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.ClientNotificationToken, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.UserCode, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.RequestedExpiry, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.IdTokenHint, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHintToken, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHint, out _).Should().BeFalse();
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Resource, out _).Should().BeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Scope, out var scope).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.AcrValues, out var _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.BindingMessage, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.ClientNotificationToken, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.UserCode, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.RequestedExpiry, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.IdTokenHint, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHintToken, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.LoginHint, out _).ShouldBeFalse();
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Resource, out _).ShouldBeFalse();
             
-            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Request, out var ro).Should().BeTrue();
-            ro.First().Should().Be("request");
+            fields.TryGetValue(OidcConstants.BackchannelAuthenticationRequest.Request, out var ro).ShouldBeTrue();
+            ro.First().ShouldBe("request");
         }
         
         [Fact]
@@ -184,13 +182,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Scope = "scope"
             });
         
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
         
-            response.AuthenticationRequestId.Should().Be("1c266114-a1be-4252-8ad1-04986c5b9ac1");
-            response.ExpiresIn.Should().Be(120);
-            response.Interval.Should().Be(2);
+            response.AuthenticationRequestId.ShouldBe("1c266114-a1be-4252-8ad1-04986c5b9ac1");
+            response.ExpiresIn.ShouldBe(120);
+            response.Interval.ShouldBe(2);
         }
         
         //
@@ -207,12 +205,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
         //         ClientId = "client"
         //     });
         //
-        //     response.IsError.Should().BeTrue();
-        //     response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-        //     response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-        //     response.Error.Should().Be("error");
-        //     response.ErrorDescription.Should().Be("error_description");
-        //     response.TryGet("custom").Should().Be("custom");
+        //     response.IsError.ShouldBeTrue();
+        //     response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+        //     response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        //     response.Error.ShouldBe("error");
+        //     response.ErrorDescription.ShouldBe("error_description");
+        //     response.TryGet("custom").ShouldBe("custom");
         // }
         //
         // [Fact]
@@ -228,10 +226,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
         //         ClientId = "client"
         //     });
         //
-        //     response.IsError.Should().BeTrue();
-        //     response.ErrorType.Should().Be(ResponseErrorType.Exception);
-        //     response.Raw.Should().Be("invalid");
-        //     response.Exception.Should().NotBeNull();
+        //     response.IsError.ShouldBeTrue();
+        //     response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+        //     response.Raw.ShouldBe("invalid");
+        //     response.Exception.ShouldNotBeNull();
         // }
         //
         // [Fact]
@@ -246,10 +244,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
         //         ClientId = "client"
         //     });
         //
-        //     response.IsError.Should().BeTrue();
-        //     response.ErrorType.Should().Be(ResponseErrorType.Exception);
-        //     response.Error.Should().Be("exception");
-        //     response.Exception.Should().NotBeNull();
+        //     response.IsError.ShouldBeTrue();
+        //     response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+        //     response.Error.ShouldBe("exception");
+        //     response.Exception.ShouldNotBeNull();
         // }
         //
         // [Fact]
@@ -264,10 +262,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
         //         ClientId = "client"
         //     });
         //
-        //     response.IsError.Should().BeTrue();
-        //     response.ErrorType.Should().Be(ResponseErrorType.Http);
-        //     response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
-        //     response.Error.Should().Be("not found");
+        //     response.IsError.ShouldBeTrue();
+        //     response.ErrorType.ShouldBe(ResponseErrorType.Http);
+        //     response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
+        //     response.Error.ShouldBe("not found");
         // }
         //
         // [Fact]
@@ -282,11 +280,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
         //         ClientId = "client"
         //     });
         //
-        //     response.IsError.Should().BeTrue();
-        //     response.ErrorType.Should().Be(ResponseErrorType.Http);
-        //     response.HttpStatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        //     response.Error.Should().Be("Unauthorized");
-        //     response.Raw.Should().Be("not_json");
+        //     response.IsError.ShouldBeTrue();
+        //     response.ErrorType.ShouldBe(ResponseErrorType.Http);
+        //     response.HttpStatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        //     response.Error.ShouldBe("Unauthorized");
+        //     response.Raw.ShouldBe("not_json");
         // }
         //
         // [Fact]
@@ -307,13 +305,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
         //         ClientId = "client"
         //     });
         //
-        //     response.IsError.Should().BeTrue();
-        //     response.ErrorType.Should().Be(ResponseErrorType.Http);
-        //     response.HttpStatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        //     response.Error.Should().Be("Unauthorized");
+        //     response.IsError.ShouldBeTrue();
+        //     response.ErrorType.ShouldBe(ResponseErrorType.Http);
+        //     response.HttpStatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        //     response.Error.ShouldBe("Unauthorized");
         //
-        //     response.Json?.TryGetString("foo").Should().Be("foo");
-        //     response.Json?.TryGetString("bar").Should().Be("bar");
+        //     response.Json?.TryGetString("foo").ShouldBe("foo");
+        //     response.Json?.TryGetString("bar").ShouldBe("bar");
         // }
     }
 }

@@ -1,11 +1,11 @@
-## About IdentityModel.OidcClient
+## About Duende.IdentityModel.OidcClient
 
-This repository contains several libraries for building OpenID Connect (OIDC) native
+This directory contains several libraries for building OpenID Connect (OIDC) native
 clients. The core `Duende.IdentityModel.OidcClient` library is a certified OIDC relying party and
 implements [RFC 8252](https://tools.ietf.org/html/rfc8252/), "OAuth 2.0 for native
 Applications". The `Duende.IdentityModel.OidcClient.Extensions` provides support for
 [DPoP](https://datatracker.ietf.org/doc/html/rfc9449) 
-extensions to IdentityModel.OidcClient for sender-constraining tokens.
+extensions to Duende.IdentityModel.OidcClient for sender-constraining tokens.
 
 ## Samples
 OidcClient targets .NET Standard, making it suitable for .NET and .NET

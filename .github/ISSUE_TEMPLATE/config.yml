@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Support Forum
-    url: https://github.com/DuendeSoftware/Support/issues/new/choose
+    url: https://github.com/DuendeSoftware/community
     about: The place for questions, support and feature requests
   - name: Create an Issue
     url: https://github.com/DuendeSoftware/foss/issues/new

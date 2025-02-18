@@ -41,6 +41,13 @@ public abstract class AccessTokenHandler : DelegatingHandler
     protected abstract Task<ClientCredentialsToken> GetAccessTokenAsync(bool forceRenewal, CancellationToken cancellationToken);
 
     /// <inheritdoc/>
+    protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        throw new NotSupportedException(
+            "The (synchronous) Send() method is not supported. Please use the async SendAsync variant. ");
+    }
+
+    /// <inheritdoc/>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         await SetTokenAsync(request, forceRenewal: false, cancellationToken).ConfigureAwait(false);

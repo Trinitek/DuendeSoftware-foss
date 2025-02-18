@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.HttpClientExtensions
 {
@@ -53,20 +51,20 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Get);
-            httpRequest.RequestUri.Should().Be(new Uri(_endpoint));
-            httpRequest.Content.Should().BeNull();
+            httpRequest.Method.ShouldBe(HttpMethod.Get);
+            httpRequest.RequestUri.ShouldBe(new Uri(_endpoint));
+            httpRequest.Content.ShouldBeNull();
 
             var headers = httpRequest.Headers;
-            headers.Count().Should().Be(2);
-            headers.Should().Contain(h => h.Key == "custom" && h.Value.First() == "custom");
+            headers.Count().ShouldBe(2);
+            headers.ShouldContain(h => h.Key == "custom" && h.Value.First() == "custom");
 
             var properties = httpRequest.GetProperties();
-            properties.Count.Should().Be(1);
+            properties.Count.ShouldBe(1);
 
             var prop = properties.First();
-            prop.Key.Should().Be("custom");
-            ((string)prop.Value).Should().Be("custom");
+            prop.Key.ShouldBe("custom");
+            ((string)prop.Value).ShouldBe("custom");
         }
 
 
@@ -80,7 +78,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -90,7 +88,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             Func<Task> act = () => client.GetDiscoveryDocumentAsync();
 
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("Either the address parameter or the HttpClient BaseAddress must not be null.");
+            await act.ShouldThrowAsync<ArgumentException>("Either the address parameter or the HttpClient BaseAddress must not be null.");
         }
 
         [Fact]
@@ -100,7 +98,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             Func<Task> act = () => client.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest());
 
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("Either the DiscoveryDocumentRequest Address or the HttpClient BaseAddress must not be null.");
+            await act.ShouldThrowAsync<ArgumentException>("Either the DiscoveryDocumentRequest Address or the HttpClient BaseAddress must not be null.");
         }
 
         [Fact]
@@ -113,7 +111,7 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Address = _endpoint
             });
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
         }
 
         [Fact]
@@ -127,8 +125,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Address = _authority
             });
 
-            disco.IsError.Should().BeTrue();
-            handler.Request.RequestUri.Should().Be(_endpoint);
+            disco.IsError.ShouldBeTrue();
+            handler.Request.RequestUri!.AbsoluteUri.ShouldBe(_endpoint);
         }
 
         [Fact]
@@ -142,11 +140,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Http);
-            disco.Error.Should().StartWith("Error connecting to");
-            disco.Error.Should().EndWith("not found");
-            disco.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Http);
+            disco.Error.ShouldStartWith("Error connecting to");
+            disco.Error.ShouldEndWith("not found");
+            disco.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
         }
 
         [Fact]
@@ -164,8 +162,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Policy = policy
             });
 
-            disco.IsError.Should().BeTrue();
-            policy.Authority.Should().Be("https://server:123");
+            disco.IsError.ShouldBeTrue();
+            policy.Authority.ShouldBe("https://server:123");
         }
 
         [Fact]
@@ -179,10 +177,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Address = _endpoint
             });
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Exception);
-            disco.Error.Should().StartWith("Error connecting to");
-            disco.Error.Should().EndWith("error.");
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            disco.Error.ShouldStartWith("Error connecting to");
+            disco.Error.ShouldEndWith("error.");
         }
 
         [Fact]
@@ -195,13 +193,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
 
-            disco.TryGetValue(OidcConstants.Discovery.AuthorizationEndpoint).Should().NotBeNull();
-            disco.TryGetValue("unknown")?.ValueKind.Should().Be(JsonValueKind.Undefined);
+            disco.TryGetValue(OidcConstants.Discovery.AuthorizationEndpoint).ShouldNotBeNull();
+            disco.TryGetValue("unknown")?.ValueKind.ShouldBe(JsonValueKind.Undefined);
 
-            disco.TryGetString(OidcConstants.Discovery.AuthorizationEndpoint).Should().Be("https://demo.identityserver.io/connect/authorize");
-            disco.TryGetString("unknown").Should().BeNull();
+            disco.TryGetString(OidcConstants.Discovery.AuthorizationEndpoint).ShouldBe("https://demo.identityserver.io/connect/authorize");
+            disco.TryGetString("unknown").ShouldBeNull();
         }
 
         [Fact]
@@ -214,29 +212,29 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeFalse();
+            disco.IsError.ShouldBeFalse();
 
-            disco.TokenEndpoint.Should().Be("https://demo.identityserver.io/connect/token");
-            disco.AuthorizeEndpoint.Should().Be("https://demo.identityserver.io/connect/authorize");
-            disco.UserInfoEndpoint.Should().Be("https://demo.identityserver.io/connect/userinfo");
-            disco.PushedAuthorizationRequestEndpoint.Should().Be("https://demo.identityserver.io/connect/par");
+            disco.TokenEndpoint.ShouldBe("https://demo.identityserver.io/connect/token");
+            disco.AuthorizeEndpoint.ShouldBe("https://demo.identityserver.io/connect/authorize");
+            disco.UserInfoEndpoint.ShouldBe("https://demo.identityserver.io/connect/userinfo");
+            disco.PushedAuthorizationRequestEndpoint.ShouldBe("https://demo.identityserver.io/connect/par");
 
-            disco.FrontChannelLogoutSupported.Should().Be(true);
-            disco.FrontChannelLogoutSessionSupported.Should().Be(true);
+            disco.FrontChannelLogoutSupported.ShouldBe(true);
+            disco.FrontChannelLogoutSessionSupported.ShouldBe(true);
 
             var responseModes = disco.ResponseModesSupported.ToList();
 
-            responseModes.Should().Contain("form_post");
-            responseModes.Should().Contain("query");
-            responseModes.Should().Contain("fragment");
+            responseModes.ShouldContain("form_post");
+            responseModes.ShouldContain("query");
+            responseModes.ShouldContain("fragment");
 
-            disco.KeySet.Keys.Count.Should().Be(1);
-            disco.KeySet.Keys.First().Kid.Should().Be("a3rMUgMFv9tPclLa6yF3zAkfquE");
+            disco.KeySet.Keys.Count.ShouldBe(1);
+            disco.KeySet.Keys.First().Kid.ShouldBe("a3rMUgMFv9tPclLa6yF3zAkfquE");
             
-            disco.MtlsEndpointAliases.Should().NotBeNull();
-            disco.MtlsEndpointAliases.TokenEndpoint.Should().BeNull();
+            disco.MtlsEndpointAliases.ShouldNotBeNull();
+            disco.MtlsEndpointAliases.TokenEndpoint.ShouldBeNull();
 
-            disco.RequirePushedAuthorizationRequests.Should().BeTrue();
+            disco.RequirePushedAuthorizationRequests!.Value.ShouldBeTrue();
         }
         
         [Fact]
@@ -265,15 +263,15 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeFalse();
-            disco.MtlsEndpointAliases.Should().NotBeNull();
+            disco.IsError.ShouldBeFalse();
+            disco.MtlsEndpointAliases.ShouldNotBeNull();
 
-            disco.MtlsEndpointAliases.TokenEndpoint.Should().Be("https://mtls.identityserver.io/connect/token");
-            disco.MtlsEndpointAliases.Json?.TryGetString(OidcConstants.Discovery.TokenEndpoint).Should().Be("https://mtls.identityserver.io/connect/token");
+            disco.MtlsEndpointAliases.TokenEndpoint.ShouldBe("https://mtls.identityserver.io/connect/token");
+            disco.MtlsEndpointAliases.Json?.TryGetString(OidcConstants.Discovery.TokenEndpoint).ShouldBe("https://mtls.identityserver.io/connect/token");
             
-            disco.MtlsEndpointAliases.RevocationEndpoint.Should().Be("https://mtls.identityserver.io/connect/revocation");
-            disco.MtlsEndpointAliases.IntrospectionEndpoint.Should().Be("https://mtls.identityserver.io/connect/introspect");
-            disco.MtlsEndpointAliases.DeviceAuthorizationEndpoint.Should().Be("https://mtls.identityserver.io/connect/deviceauthorization");
+            disco.MtlsEndpointAliases.RevocationEndpoint.ShouldBe("https://mtls.identityserver.io/connect/revocation");
+            disco.MtlsEndpointAliases.IntrospectionEndpoint.ShouldBe("https://mtls.identityserver.io/connect/introspect");
+            disco.MtlsEndpointAliases.DeviceAuthorizationEndpoint.ShouldBe("https://mtls.identityserver.io/connect/deviceauthorization");
         }
 
         [Fact]
@@ -287,12 +285,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Http);
-            disco.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            disco.Error.Should().Contain("Internal Server Error");
-            disco.Raw.Should().Be("not_json");
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Http);
+            disco.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            disco.Error.ShouldContain("Internal Server Error");
+            disco.Raw.ShouldBe("not_json");
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
         }
 
         [Fact]
@@ -313,13 +311,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Http);
-            disco.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            disco.Error.Should().Contain("Internal Server Error");
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Http);
+            disco.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            disco.Error.ShouldContain("Internal Server Error");
 
-            disco.Json?.TryGetString("foo").Should().Be("foo");
-            disco.Json?.TryGetString("bar").Should().Be("bar");
+            disco.Json?.TryGetString("foo").ShouldBe("foo");
+            disco.Json?.TryGetString("bar").ShouldBe("bar");
         }
 
         [Fact]
@@ -357,12 +355,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Http);
-            disco.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            disco.Error.Should().Contain("Internal Server Error");
-            disco.Raw.Should().Be("not_json");
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Http);
+            disco.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            disco.Error.ShouldContain("Internal Server Error");
+            disco.Raw.ShouldBe("not_json");
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
         }
 
         [Fact]
@@ -406,13 +404,13 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Http);
-            disco.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            disco.Error.Should().Contain("Internal Server Error");
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Http);
+            disco.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            disco.Error.ShouldContain("Internal Server Error");
 
-            disco.Json?.TryGetString("foo").Should().Be("foo");
-            disco.Json?.TryGetString("bar").Should().Be("bar");
+            disco.Json?.TryGetString("foo").ShouldBe("foo");
+            disco.Json?.TryGetString("bar").ShouldBe("bar");
         }
 
         [Fact]
@@ -443,10 +441,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Exception);
-            disco.Error.Should().Contain("jwk failure");
-            disco.Error.Should().NotContain("Object reference not set to an instance of an object");
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            disco.Error.ShouldContain("jwk failure");
+            disco.Error.ShouldNotContain("Object reference not set to an instance of an object");
         }
 
          [Fact]
@@ -481,11 +479,11 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var disco = await client.GetDiscoveryDocumentAsync();
 
-            disco.IsError.Should().BeTrue();
-            disco.ErrorType.Should().Be(ResponseErrorType.Http);
-            disco.HttpStatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            disco.Error.Should().Contain("Internal Server Error");
-            disco.Json?.ValueKind.Should().Be(JsonValueKind.Undefined);
+            disco.IsError.ShouldBeTrue();
+            disco.ErrorType.ShouldBe(ResponseErrorType.Http);
+            disco.HttpStatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+            disco.Error.ShouldContain("Internal Server Error");
+            disco.Json?.ValueKind.ShouldBe(JsonValueKind.Undefined);
         }
     }
 }

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel
@@ -35,8 +33,8 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestClientCredentialsTokenAsync();
 
-            response.IsError.Should().BeFalse();
-            _handler.Request.RequestUri.AbsoluteUri.Should().Be(Endpoint);
+            response.IsError.ShouldBeFalse();
+            _handler.Request.RequestUri.AbsoluteUri.ShouldBe(Endpoint);
         }
 
         [Fact]
@@ -46,14 +44,14 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestClientCredentialsTokenAsync(scope: "scope");
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.ClientCredentials);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.ClientCredentials);
 
-            fields.TryGetValue("scope", out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
         }
 
         [Fact]
@@ -63,17 +61,17 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestDeviceTokenAsync(deviceCode: "device_code");
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.DeviceCode);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.DeviceCode);
 
-            fields.TryGetValue("client_id", out var client_id).Should().BeTrue();
-            client_id.First().Should().Be("device");
+            fields.TryGetValue("client_id", out var client_id).ShouldBeTrue();
+            client_id.First().ShouldBe("device");
 
-            fields.TryGetValue("device_code", out var device_code).Should().BeTrue();
-            device_code.First().Should().Be("device_code");
+            fields.TryGetValue("device_code", out var device_code).ShouldBeTrue();
+            device_code.First().ShouldBe("device_code");
         }
 
         [Fact]
@@ -83,7 +81,8 @@ namespace Duende.IdentityModel
 
             Func<Task> act = async () => await tokenClient.RequestDeviceTokenAsync(null);
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("device_code");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("device_code");
         }
 
         [Fact]
@@ -93,20 +92,20 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestPasswordTokenAsync(userName: "user", password: "password", scope: "scope");
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.Password);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.Password);
 
-            fields.TryGetValue("username", out var username).Should().BeTrue();
-            username.First().Should().Be("user");
+            fields.TryGetValue("username", out var username).ShouldBeTrue();
+            username.First().ShouldBe("user");
 
-            fields.TryGetValue("password", out var password).Should().BeTrue();
-            password.First().Should().Be("password");
+            fields.TryGetValue("password", out var password).ShouldBeTrue();
+            password.First().ShouldBe("password");
 
-            fields.TryGetValue("scope", out var scope).Should().BeTrue();
-            scope.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var scope).ShouldBeTrue();
+            scope.First().ShouldBe("scope");
         }
 
         [Fact]
@@ -116,17 +115,17 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestPasswordTokenAsync(userName: "user");
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.Password);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.Password);
 
-            fields.TryGetValue("username", out var username).Should().BeTrue();
-            username.First().Should().Be("user");
+            fields.TryGetValue("username", out var username).ShouldBeTrue();
+            username.First().ShouldBe("user");
 
-            fields.TryGetValue("password", out var password).Should().BeTrue();
-            password.First().Should().Be("");
+            fields.TryGetValue("password", out var password).ShouldBeTrue();
+            password.First().ShouldBe("");
         }
 
         [Fact]
@@ -136,7 +135,8 @@ namespace Duende.IdentityModel
 
             Func<Task> act = async () => await tokenClient.RequestPasswordTokenAsync(userName: null);
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("username");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("username");
         }
 
         [Fact]
@@ -146,20 +146,20 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestAuthorizationCodeTokenAsync(code: "code", redirectUri: "uri", codeVerifier: "verifier");
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.AuthorizationCode);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.AuthorizationCode);
 
-            fields.TryGetValue("code", out var code).Should().BeTrue();
-            code.First().Should().Be("code");
+            fields.TryGetValue("code", out var code).ShouldBeTrue();
+            code.First().ShouldBe("code");
 
-            fields.TryGetValue("redirect_uri", out var redirect_uri).Should().BeTrue();
-            redirect_uri.First().Should().Be("uri");
+            fields.TryGetValue("redirect_uri", out var redirect_uri).ShouldBeTrue();
+            redirect_uri.First().ShouldBe("uri");
 
-            fields.TryGetValue("code_verifier", out var code_verifier).Should().BeTrue();
-            code_verifier.First().Should().Be("verifier");
+            fields.TryGetValue("code_verifier", out var code_verifier).ShouldBeTrue();
+            code_verifier.First().ShouldBe("verifier");
         }
 
         [Fact]
@@ -169,7 +169,8 @@ namespace Duende.IdentityModel
 
             Func<Task> act = async () => await tokenClient.RequestAuthorizationCodeTokenAsync(code: null, redirectUri: "uri", codeVerifier: "verifier");
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("code");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("code");
         }
 
         [Fact]
@@ -179,7 +180,8 @@ namespace Duende.IdentityModel
 
             Func<Task> act = async () => await tokenClient.RequestAuthorizationCodeTokenAsync(code: "code", redirectUri: null, codeVerifier: "verifier");
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("redirect_uri");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("redirect_uri");
         }
 
         [Fact]
@@ -189,17 +191,17 @@ namespace Duende.IdentityModel
 
             var response = await tokenClient.RequestRefreshTokenAsync(refreshToken: "rt", scope: "scope");
 
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be(OidcConstants.GrantTypes.RefreshToken);
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe(OidcConstants.GrantTypes.RefreshToken);
 
-            fields.TryGetValue("refresh_token", out var code).Should().BeTrue();
-            code.First().Should().Be("rt");
+            fields.TryGetValue("refresh_token", out var code).ShouldBeTrue();
+            code.First().ShouldBe("rt");
 
-            fields.TryGetValue("scope", out var redirect_uri).Should().BeTrue();
-            redirect_uri.First().Should().Be("scope");
+            fields.TryGetValue("scope", out var redirect_uri).ShouldBeTrue();
+            redirect_uri.First().ShouldBe("scope");
         }
 
         [Fact]
@@ -209,7 +211,8 @@ namespace Duende.IdentityModel
 
             Func<Task> act = async () => await tokenClient.RequestRefreshTokenAsync(refreshToken: null, scope: "scope");
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("refresh_token");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("refresh_token");
         }
 
         [Fact]
@@ -219,7 +222,8 @@ namespace Duende.IdentityModel
 
             Func<Task> act = async () => await tokenClient.RequestTokenAsync(grantType: null);
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("grant_type");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.ParamName.ShouldBe("grant_type");
         }
 
         [Fact]
@@ -238,20 +242,20 @@ namespace Duende.IdentityModel
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be("test");
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe("test");
 
-            fields.TryGetValue("client_id", out var client_id).Should().BeTrue();
-            client_id.First().Should().Be("custom");
+            fields.TryGetValue("client_id", out var client_id).ShouldBeTrue();
+            client_id.First().ShouldBe("custom");
 
-            fields.TryGetValue("client_secret", out var client_secret).Should().BeTrue();
-            client_secret.First().Should().Be("custom");
+            fields.TryGetValue("client_secret", out var client_secret).ShouldBeTrue();
+            client_secret.First().ShouldBe("custom");
 
-            fields.TryGetValue("custom", out var custom).Should().BeTrue();
-            custom.First().Should().Be("custom");
+            fields.TryGetValue("custom", out var custom).ShouldBeTrue();
+            custom.First().ShouldBe("custom");
         }
 
         [Fact]
@@ -270,23 +274,23 @@ namespace Duende.IdentityModel
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("grant_type", out var grant_type).Should().BeTrue();
-            grant_type.First().Should().Be("test");
+            fields.TryGetValue("grant_type", out var grant_type).ShouldBeTrue();
+            grant_type.First().ShouldBe("test");
 
-            fields.TryGetValue("client_id", out var client_id).Should().BeTrue();
-            client_id.First().Should().Be("custom");
+            fields.TryGetValue("client_id", out var client_id).ShouldBeTrue();
+            client_id.First().ShouldBe("custom");
 
-            fields.TryGetValue("client_secret", out var client_secret).Should().BeTrue();
-            client_secret.First().Should().Be("custom");
+            fields.TryGetValue("client_secret", out var client_secret).ShouldBeTrue();
+            client_secret.First().ShouldBe("custom");
 
-            fields.TryGetValue("custom", out var custom).Should().BeTrue();
-            custom.First().Should().Be("custom");
+            fields.TryGetValue("custom", out var custom).ShouldBeTrue();
+            custom.First().ShouldBe("custom");
 
-            fields.TryGetValue("global", out var global).Should().BeTrue();
-            global.First().Should().Be("global");
+            fields.TryGetValue("global", out var global).ShouldBeTrue();
+            global.First().ShouldBe("global");
         }
 
         [Fact]
@@ -304,9 +308,9 @@ namespace Duende.IdentityModel
             
             _ = await tokenClient.RequestTokenAsync(grantType: "test", parameters: localParameters);
 
-            globalOptions.Parameters.Should().HaveCount(1);
+            globalOptions.Parameters.Count.ShouldBe(1);
             var globalValue = globalOptions.Parameters.FirstOrDefault(p => p.Key == "global").Value;
-            globalValue.Should().Be("value");
+            globalValue.ShouldBe("value");
         }
 
         [Fact]
@@ -323,9 +327,9 @@ namespace Duende.IdentityModel
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should().Be(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter.ShouldBe(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", "secret"));
         }
 
         [Fact]
@@ -341,11 +345,11 @@ namespace Duende.IdentityModel
             var response = await tokenClient.RequestTokenAsync(grantType: "test");
 
             var request = _handler.Request;
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields["client_id"].First().Should().Be("client");
-            fields["client_secret"].First().Should().Be("secret");
+            fields["client_id"].First().ShouldBe("client");
+            fields["client_secret"].First().ShouldBe("secret");
 
         }
 
@@ -362,10 +366,10 @@ namespace Duende.IdentityModel
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().BeNull();
+            request.Headers.Authorization.ShouldBeNull();
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields["client_id"].First().Should().Be("client");
+            fields["client_id"].First().ShouldBe("client");
         }
 
         [Fact]
@@ -381,13 +385,13 @@ namespace Duende.IdentityModel
 
             var request = _handler.Request;
 
-            request.Headers.Authorization.Should().NotBeNull();
-            request.Headers.Authorization.Scheme.Should().Be("Basic");
-            request.Headers.Authorization.Parameter.Should().Be(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", ""));
+            request.Headers.Authorization.ShouldNotBeNull();
+            request.Headers.Authorization.Scheme.ShouldBe("Basic");
+            request.Headers.Authorization.Parameter.ShouldBe(BasicAuthenticationOAuthHeaderValue.EncodeCredential("client", ""));
 
             var fields = QueryHelpers.ParseQuery(_handler.Body);
-            fields.TryGetValue("client_secret", out _).Should().BeFalse();
-            fields.TryGetValue("client_id", out _).Should().BeFalse();
+            fields.TryGetValue("client_secret", out _).ShouldBeFalse();
+            fields.TryGetValue("client_id", out _).ShouldBeFalse();
         }
 
         [Fact]
@@ -402,10 +406,10 @@ namespace Duende.IdentityModel
             var response = await tokenClient.RequestTokenAsync(grantType: "test");
             var fields = QueryHelpers.ParseQuery(_handler.Body);
 
-            fields["grant_type"].First().Should().Be("test");
-            fields["client_id"].First().Should().Be("client");
-            fields["client_assertion_type"].First().Should().Be("type");
-            fields["client_assertion"].First().Should().Be("value");
+            fields["grant_type"].First().ShouldBe("test");
+            fields["client_id"].First().ShouldBe("client");
+            fields["client_assertion_type"].First().ShouldBe("type");
+            fields["client_assertion"].First().ShouldBe("value");
         }
     }
 }

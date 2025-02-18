@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Duende.IdentityModel.OidcClient.Infrastructure;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -20,7 +20,7 @@ namespace Duende.IdentityModel.OidcClient
             // We instantiate the test class as an example of a class that is
             // not (and won't ever be) in the generation context.
             var act = () => LogSerializer.Serialize(new LogSerializerTests());
-            act.Should().NotThrow<Exception>();
+            act.ShouldNotThrow();
         }
     }
 }

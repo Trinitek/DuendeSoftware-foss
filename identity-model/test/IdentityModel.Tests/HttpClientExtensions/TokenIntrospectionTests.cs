@@ -1,13 +1,12 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
-using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.Infrastructure;
-using FluentAssertions;
+using Shouldly;
 
 namespace Duende.IdentityModel.HttpClientExtensions
 {
@@ -34,15 +33,12 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var httpRequest = handler.Request;
 
-            httpRequest.Method.Should().Be(HttpMethod.Post);
-            httpRequest.RequestUri.Should().Be(new Uri(Endpoint));
-            httpRequest.Content.Should().NotBeNull();
-            httpRequest.Headers.Should().BeEquivalentTo(new Dictionary<string, string[]>
-            {
-                ["Accept"] = new[] { "application/json" },
-                ["custom"] = new[] { "custom" },
-            });
-            httpRequest.GetProperties().Should().BeEquivalentTo(new Dictionary<string, string>
+            httpRequest.Method.ShouldBe(HttpMethod.Post);
+            httpRequest.RequestUri.ShouldBe(new Uri(Endpoint));
+            httpRequest.Content.ShouldNotBeNull();
+            httpRequest.Headers.Accept.ShouldBe([MediaTypeWithQualityHeaderValue.Parse("application/json")]);
+            httpRequest.Headers.GetValues("custom").ShouldBe(["custom"]);
+            httpRequest.GetProperties().ShouldBe(new Dictionary<string, object>
             {
                 ["custom"] = "custom",
             });
@@ -64,26 +60,27 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.IsActive.Should().BeTrue();
-            response.Claims.Should().BeEquivalentTo(new[]
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.IsActive.ShouldBeTrue();
+            var expected = new Claim[]
             {
-                new Claim("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("active", "true", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api2", ClaimValueTypes.String, "https://idsvr4"),
-            });
+                new("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
+                new("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
+                new("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
+                new("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
+                new("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
+                new("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
+                new("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
+                new("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
+                new("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
+                new("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
+                new("active", "true", ClaimValueTypes.String, "https://idsvr4"),
+                new("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
+                new("scope", "api2", ClaimValueTypes.String, "https://idsvr4"),
+            };
+            response.Claims.ShouldBe(expected, new ClaimComparer());
         }
 
         [Fact]
@@ -102,25 +99,26 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.IsActive.Should().BeTrue();
-            response.Claims.Should().BeEquivalentTo(new[]
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.IsActive.ShouldBeTrue();
+            var expectedClaims = new Claim[]
             {
-                new Claim("aud", "https://idsvr4/resources", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("aud", "api1", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("nbf", "1475824871", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("exp", "1475828471", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("client_id", "client", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("sub", "1", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("auth_time", "1475824871", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("idp", "local", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("amr", "password", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("active", "true", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("scope", "api1", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-                new Claim("scope", "api2", ClaimValueTypes.String, "LOCAL AUTHORITY"),
-            });
+                new("aud", "https://idsvr4/resources", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("aud", "api1", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("nbf", "1475824871", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("exp", "1475828471", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("client_id", "client", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("sub", "1", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("auth_time", "1475824871", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("idp", "local", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("amr", "password", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("active", "true", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("scope", "api1", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+                new("scope", "api2", ClaimValueTypes.String, "LOCAL AUTHORITY"),
+            };
+            response.Claims.ShouldBe(expectedClaims, new ClaimComparer());
         }
 
         [Fact]
@@ -141,50 +139,36 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             var response = await client.IntrospectTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.IsActive.Should().BeTrue();
-            response.Claims.Should().BeEquivalentTo(new[]
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.IsActive.ShouldBeTrue();
+            var expectedClaims = new Claim[]
             {
-                new Claim("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("active", "true", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api2", ClaimValueTypes.String, "https://idsvr4"),
-            });
+                new("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
+                new("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
+                new("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
+                new("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
+                new("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
+                new("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
+                new("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
+                new("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
+                new("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
+                new("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
+                new("active", "true", ClaimValueTypes.String, "https://idsvr4"),
+                new("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
+                new("scope", "api2", ClaimValueTypes.String, "https://idsvr4"),
+            };
+            response.Claims.ShouldBe(expectedClaims, new ClaimComparer());
 
             // repeat
             response = await client.IntrospectTokenAsync(request);
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.IsActive.Should().BeTrue();
-            response.Claims.Should().BeEquivalentTo(new[]
-            {
-                new Claim("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("active", "true", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api2", ClaimValueTypes.String, "https://idsvr4"),
-            });
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.IsActive.ShouldBeTrue();
+            response.Claims.ShouldBe(expectedClaims, new ClaimComparer());
         }
 
         [Fact]
@@ -200,7 +184,8 @@ namespace Duende.IdentityModel.HttpClientExtensions
 
             Func<Task> act = async () => await client.IntrospectTokenAsync(new TokenIntrospectionRequest());
 
-            (await act.Should().ThrowAsync<ArgumentException>()).WithParameterName("token");
+            var exception = await act.ShouldThrowAsync<ArgumentException>();
+            exception.Message.ShouldContain("token");
         }
 
         [Fact]
@@ -216,10 +201,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Raw.Should().Be("invalid");
-            response.Exception.Should().BeAssignableTo<JsonException>();
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Raw.ShouldBe("invalid");
+            response.Exception.ShouldBeAssignableTo<JsonException>();
         }
 
         [Fact]
@@ -235,10 +220,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Exception);
-            response.Error.Should().Be("exception");
-            response.Exception.Should().BeSameAs(exception);
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Exception);
+            response.Error.ShouldBe("exception");
+            response.Exception.ShouldBeSameAs(exception);
         }
 
         [Fact]
@@ -253,10 +238,10 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeTrue();
-            response.ErrorType.Should().Be(ResponseErrorType.Http);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.NotFound);
-            response.Error.Should().Be("not found");
+            response.IsError.ShouldBeTrue();
+            response.ErrorType.ShouldBe(ResponseErrorType.Http);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.Error.ShouldBe("not found");
         }
 
         [Fact]
@@ -272,26 +257,26 @@ namespace Duende.IdentityModel.HttpClientExtensions
                 Token = "token"
             });
 
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.IsActive.Should().BeTrue();
-            response.Claims.Should().BeEquivalentTo(new[]
-            {
-                new Claim("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("active", "true", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
-                new Claim("scope", "api2", ClaimValueTypes.String, "https://idsvr4"),
-            });
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.IsActive.ShouldBeTrue();
+            var expectedClaims = new Claim[] {
+                new("aud", "https://idsvr4/resources", ClaimValueTypes.String, "https://idsvr4"),
+                new("aud", "api1", ClaimValueTypes.String, "https://idsvr4"),
+                new("iss", "https://idsvr4", ClaimValueTypes.String, "https://idsvr4"),
+                new("nbf", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
+                new("exp", "1475828471", ClaimValueTypes.String, "https://idsvr4"),
+                new("client_id", "client", ClaimValueTypes.String, "https://idsvr4"),
+                new("sub", "1", ClaimValueTypes.String, "https://idsvr4"),
+                new("auth_time", "1475824871", ClaimValueTypes.String, "https://idsvr4"),
+                new("idp", "local", ClaimValueTypes.String, "https://idsvr4"),
+                new("amr", "password", ClaimValueTypes.String, "https://idsvr4"),
+                new("active", "true", ClaimValueTypes.String, "https://idsvr4"),
+                new("scope", "api1", ClaimValueTypes.String, "https://idsvr4"),
+                new("scope", "api2", ClaimValueTypes.String, "https://idsvr4")
+            };
+            response.Claims.ShouldBe(expectedClaims, new ClaimComparer());
         }
 
         [Fact]
@@ -315,14 +300,14 @@ namespace Duende.IdentityModel.HttpClientExtensions
             });
 
             // check request
-            handler.Body.Should().Be("scope=scope1&scope=scope2&foo=bar+baz&token=token");
+            handler.Body.ShouldBe("scope=scope1&scope=scope2&foo=bar+baz&token=token");
 
             // check response
-            response.IsError.Should().BeFalse();
-            response.ErrorType.Should().Be(ResponseErrorType.None);
-            response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-            response.IsActive.Should().BeTrue();
-            response.Claims.Should().NotBeEmpty();
+            response.IsError.ShouldBeFalse();
+            response.ErrorType.ShouldBe(ResponseErrorType.None);
+            response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+            response.IsActive.ShouldBeTrue();
+            response.Claims.ShouldNotBeEmpty();
         }
     }
 }

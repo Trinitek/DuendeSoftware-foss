@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Text;
-using FluentAssertions;
+
 using Duende.IdentityModel;
 
 namespace Duende.IdentityModel.OidcClient;
@@ -27,7 +27,7 @@ public class CryptoHelperTests
 
         var hashString = Base64Url.Encode(leftHalf);
 
-        sut.ValidateHash(data, hashString, algorithmName).Should().BeTrue();
+        sut.ValidateHash(data, hashString, algorithmName).ShouldBeTrue();
     }
 
 }

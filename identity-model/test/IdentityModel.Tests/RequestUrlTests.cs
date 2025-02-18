@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Duende.IdentityModel.Client;
-using FluentAssertions;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityModel
@@ -21,7 +21,7 @@ namespace Duende.IdentityModel
 
             var url = request.Create(null);
 
-            url.Should().Be(Authority);
+            url.ShouldBe(Authority);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Duende.IdentityModel
             var values = new Parameters();
             var url = request.Create(values);
 
-            url.Should().Be(Authority);
+            url.ShouldBe(Authority);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Duende.IdentityModel
 
             var url = request.Create(parameters);
 
-            url.Should().Be("http://server/authorize?foo=foo&bar=bar");
+            url.ShouldBe("http://server/authorize?foo=foo&bar=bar");
         }
         
         [Fact]
@@ -64,7 +64,7 @@ namespace Duende.IdentityModel
 
             var url = request.Create(parameters);
 
-            url.Should().Be("http://server/authorize?foo=foo&foo=bar");
+            url.ShouldBe("http://server/authorize?foo=foo&foo=bar");
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Duende.IdentityModel
 
             var url = request.Create(parameters);
 
-            url.Should().Be("http://server/authorize?scope=a%20b%20c&clientId=a%2Bb%2Bc");
+            url.ShouldBe("http://server/authorize?scope=a%20b%20c&clientId=a%2Bb%2Bc");
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace Duende.IdentityModel
 
             var url = request.Create(parameters);
 
-            url.Should().Be("/authorize?foo=foo&bar=bar");
+            url.ShouldBe("/authorize?foo=foo&bar=bar");
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace Duende.IdentityModel
 
             var url = request.Create(parameters);
 
-            url.Should().Be("/authorize?foo=foo");
+            url.ShouldBe("/authorize?foo=foo");
         }
 
         [Fact]
@@ -124,12 +124,12 @@ namespace Duende.IdentityModel
             var urlString = request.CreateAuthorizeUrl(clientId: ClientId, requestUri: requestUri);
             var url = new Uri(urlString);
             
-            url.GetLeftPart(UriPartial.Path).Should().Be(Authority); 
+            url.GetLeftPart(UriPartial.Path).ShouldBe(Authority); 
 
             var fields = QueryHelpers.ParseQuery(url.Query);
-            fields.Count.Should().Be(2);
-            fields["client_id"].Single().Should().Be(ClientId);
-            fields["request_uri"].Single().Should().Be(requestUri);
+            fields.Count.ShouldBe(2);
+            fields["client_id"].Single().ShouldBe(ClientId);
+            fields["request_uri"].Single().ShouldBe(requestUri);
         }
         
         [Fact]
@@ -149,15 +149,15 @@ namespace Duende.IdentityModel
             );
             var url = new Uri(urlString);
             
-            url.GetLeftPart(UriPartial.Path).Should().Be(Authority); 
+            url.GetLeftPart(UriPartial.Path).ShouldBe(Authority); 
 
             var fields = QueryHelpers.ParseQuery(url.Query);
-            fields.Count.Should().Be(5);
-            fields["client_id"].Single().Should().Be(ClientId);
-            fields["response_type"].Single().Should().Be("code");
-            fields["redirect_uri"].Single().Should().Be(redirectUri);
-            fields["scope"].Single().Should().Be(scope);
-            fields["state"].Single().Should().Be(state);
+            fields.Count.ShouldBe(5);
+            fields["client_id"].Single().ShouldBe(ClientId);
+            fields["response_type"].Single().ShouldBe("code");
+            fields["redirect_uri"].Single().ShouldBe(redirectUri);
+            fields["scope"].Single().ShouldBe(scope);
+            fields["state"].Single().ShouldBe(state);
         }
     }
 }

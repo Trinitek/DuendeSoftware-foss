@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Duende.IdentityModel.Client;
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel
 {
@@ -16,7 +16,8 @@ namespace Duende.IdentityModel
         {
             Action act = () => DiscoveryEndpoint.ParseUrl(input);
 
-            act.Should().Throw<InvalidOperationException>().Where(e => e.Message.Equals("Malformed URL"));
+            var exception = act.ShouldThrow<InvalidOperationException>();
+            exception.Message.ShouldBe("Malformed URL");
         }
 
         [Theory]
@@ -29,8 +30,8 @@ namespace Duende.IdentityModel
             var result = DiscoveryEndpoint.ParseUrl(input);
 
             // test parse URL logic
-            result.Url.Should().Be("https://server:123/.well-known/openid-configuration");
-            result.Authority.Should().Be("https://server:123");
+            result.Url.ShouldBe("https://server:123/.well-known/openid-configuration");
+            result.Authority.ShouldBe("https://server:123");
         }
 
         [Theory]
@@ -44,8 +45,8 @@ namespace Duende.IdentityModel
             var result = DiscoveryEndpoint.ParseUrl(input, documentPath);
 
             // test parse URL logic
-            result.Url.Should().Be("https://server:123/strange-location/openid-configuration");
-            result.Authority.Should().Be("https://server:123");
+            result.Url.ShouldBe("https://server:123/strange-location/openid-configuration");
+            result.Authority.ShouldBe("https://server:123");
         }
     }
 }

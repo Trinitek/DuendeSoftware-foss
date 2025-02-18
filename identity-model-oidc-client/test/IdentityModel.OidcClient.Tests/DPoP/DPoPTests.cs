@@ -6,10 +6,9 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient.DPoP.Framework;
 using Duende.IdentityServer.Models;
-using FluentAssertions;
-using Duende.IdentityModel.Client;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityModel.OidcClient.DPoP;
@@ -55,8 +54,8 @@ public class DPoPTest : IntegrationTestBase
             ClientSecret = "secret",
         });
 
-        tokenResponse.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        tokenResponse.TokenType.Should().Be("DPoP");
+        tokenResponse.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        tokenResponse.TokenType.ShouldBe("DPoP");
     }
 
     [Fact]
@@ -74,8 +73,8 @@ public class DPoPTest : IntegrationTestBase
             ClientSecret = "secret",
         });
 
-        tokenResponse.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        tokenResponse.TokenType.Should().Be("DPoP");
+        tokenResponse.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        tokenResponse.TokenType.ShouldBe("DPoP");
     }
 
     [Fact]
@@ -97,11 +96,11 @@ public class DPoPTest : IntegrationTestBase
 
         ApiHost.ApiInvoked += ctx =>
         {
-            ctx.User.Identity.IsAuthenticated.Should().BeTrue();
+            ctx.User.Identity.IsAuthenticated.ShouldBeTrue();
         };
 
         var apiResponse = await apiClient.GetAsync(ApiHost.Url("/api"));
-        apiResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        apiResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -127,11 +126,11 @@ public class DPoPTest : IntegrationTestBase
 
         ApiHost.ApiInvoked += ctx =>
         {
-            ctx.User.Identity.IsAuthenticated.Should().BeTrue();
+            ctx.User.Identity.IsAuthenticated.ShouldBeTrue();
         };
 
         var apiResponse = await apiClient.GetAsync(ApiHost.Url("/api"));
-        apiResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        apiResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }
 

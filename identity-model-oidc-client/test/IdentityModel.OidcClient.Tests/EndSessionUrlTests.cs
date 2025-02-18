@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using FluentAssertions;
+
 
 namespace Duende.IdentityModel.OidcClient
 {
@@ -15,7 +15,7 @@ namespace Duende.IdentityModel.OidcClient
 
             var url = client.CreateEndSessionUrl("https://server/end_session", new LogoutRequest());
 
-            url.Should().Be("https://server/end_session");
+            url.ShouldBe("https://server/end_session");
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Duende.IdentityModel.OidcClient
             var client = new AuthorizeClient(options);
             var url = client.CreateEndSessionUrl("https://server/end_session", new LogoutRequest());
 
-            url.Should().Be("https://server/end_session?post_logout_redirect_uri=https%3A%2F%2Fclient.com%2Fpage");
+            url.ShouldBe("https://server/end_session?post_logout_redirect_uri=https%3A%2F%2Fclient.com%2Fpage");
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Duende.IdentityModel.OidcClient
             var client = new AuthorizeClient(options);
             var url = client.CreateEndSessionUrl("https://server/end_session", new LogoutRequest { IdTokenHint = "id_token" });
 
-            url.Should().Be("https://server/end_session?id_token_hint=id_token&post_logout_redirect_uri=https%3A%2F%2Fclient.com%2Fpage");
+            url.ShouldBe("https://server/end_session?id_token_hint=id_token&post_logout_redirect_uri=https%3A%2F%2Fclient.com%2Fpage");
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Duende.IdentityModel.OidcClient
 
             var url = client.CreateEndSessionUrl("https://server/end_session", new LogoutRequest { IdTokenHint = "id_token" });
 
-            url.Should().Be("https://server/end_session?id_token_hint=id_token");
+            url.ShouldBe("https://server/end_session?id_token_hint=id_token");
         }
     }
 }
