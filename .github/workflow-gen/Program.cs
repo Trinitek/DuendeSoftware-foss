@@ -1,4 +1,4 @@
-﻿﻿// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Logicality.GitHub.Actions.Workflow;
@@ -110,8 +110,9 @@ void GenerateReleaseWorkflow(Component component)
     workflow.On
         .WorkflowDispatch()
         .Inputs(
-            new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0")
-            , new StringInput("target-branch", "(Optional) the name of the branch to release from", false, "main"));
+            new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"),
+            new StringInput("branch", "(Optional) the name of the branch to release from", false, "main"),
+            new BooleanInput("remove-tag-if-exists", "If set, will remove the existing tag. Use this if you have issues with the previous release action", false, false));
 
     workflow.EnvDefaults();
 
@@ -132,11 +133,26 @@ void GenerateReleaseWorkflow(Component component)
 
     tagJob.StepSetupDotNet();
 
+
+    tagJob.Step()
+        .Name("Git Config")
+        .Run(@"git config --global user.email ""github-bot@duendesoftware.com""
+git config --global user.name ""Duende Software GitHub Bot""");
+
+    tagJob.Step()
+        .Name("Remove previous git tag")
+        .If("github.event.inputs['remove-tag-if-exists'] == 'true'")
+        .Run($@"if git rev-parse {component.TagPrefix}-{contexts.Event.Input.Version} >/dev/null 2>&1; then
+  git tag -d {component.TagPrefix}-{contexts.Event.Input.Version}
+  git push --delete origin {component.TagPrefix}-{contexts.Event.Input.Version}
+else
+  echo 'Tag {component.TagPrefix}-{contexts.Event.Input.Version} does not exist.'
+fi");
+
+
     tagJob.Step()
         .Name("Git tag")
-        .Run($@"git config --global user.email ""github-bot@duendesoftware.com""
-git config --global user.name ""Duende Software GitHub Bot""
-git tag -a {component.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
+        .Run($@"git tag -a {component.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
 git push origin {component.TagPrefix}-{contexts.Event.Input.Version}");
 
     foreach (var project in component.Projects)
@@ -146,20 +162,20 @@ git push origin {component.TagPrefix}-{contexts.Event.Input.Version}");
 
     tagJob.StepToolRestore();
 
-    tagJob.StepSign(true);
+    tagJob.StepSign(always: true);
 
-    tagJob.StepPush("MyGet", "https://www.myget.org/F/duende_identityserver/api/v2/package", "MYGET");
-
-    tagJob.StepPush("GitHub", "https://nuget.pkg.github.com/DuendeSoftware/index.json", "GITHUB_TOKEN")
+    tagJob.StepPush("GitHub", "https://nuget.pkg.github.com/DuendeSoftware/index.json", "GITHUB_TOKEN", pushAlways: true)
         .Env(("GITHUB_TOKEN", contexts.Secrets.GitHubToken),
             ("NUGET_AUTH_TOKEN", contexts.Secrets.GitHubToken));
 
-    tagJob.StepUploadArtifacts(component.Name);
+    tagJob.StepUploadArtifacts(component.Name, uploadAlways: true);
 
     var publishJob = workflow.Job("publish")
         .Name("Publish to nuget.org")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
-        .Needs("tag");
+        .Needs("tag")
+        .Environment("nuget.org", "");
+        ;
 
     publishJob.Step()
         .Uses("actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16") // 4.1.8
@@ -172,7 +188,9 @@ git push origin {component.TagPrefix}-{contexts.Event.Input.Version}");
         .Shell("bash")
         .Run("tree");
 
-    publishJob.StepPush("nuget.org", "https://api.nuget.org/v3/index.json", "NUGET_ORG_API_KEY");
+    tagJob.StepPush("MyGet", "https://www.myget.org/F/duende_identityserver/api/v2/package", "MYGET", pushAlways: true);
+
+    publishJob.StepPush("nuget.org", "https://api.nuget.org/v3/index.json", "NUGET_ORG_API_KEY", pushAlways: true);
 
     var fileName = $"{component.Name}-release";
     WriteWorkflow(workflow, fileName);
@@ -320,22 +338,31 @@ public static class StepExtensions
     public static Step IfGithubEventIsPush(this Step step)
         => step.If("github.event_name == 'push'");
 
-    public static Step StepPush(this Job job, string destination, string sourceUrl, string secretName)
+    public static Step StepPush(this Job job, string destination, string sourceUrl, string secretName, bool pushAlways = false)
     {
         var apiKey = $"${{{{ secrets.{secretName} }}}}";
-        return job.Step()
-            .Name($"Push packages to {destination}")
-            .IfRefMain()
-            .Run($"dotnet nuget push artifacts/*.nupkg --source {sourceUrl} --api-key {apiKey} --skip-duplicate");
+        var step = job.Step()
+            .Name($"Push packages to {destination}");
+
+        if (!pushAlways)
+        {
+            step.IfRefMain();
+        }
+        return step.Run($"dotnet nuget push artifacts/*.nupkg --source {sourceUrl} --api-key {apiKey} --skip-duplicate");
     }
 
-    public static void StepUploadArtifacts(this Job job, string componentName)
+    public static void StepUploadArtifacts(this Job job, string componentName, bool uploadAlways = false)
     {
         var path = $"{componentName}/artifacts/*.nupkg";
-        job.Step()
-            .Name("Upload Artifacts")
-            .IfGithubEventIsPush()
-            .Uses("actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882") // 4.4.3
+        var step = job.Step()
+            .Name("Upload Artifacts");
+
+        if (!uploadAlways)
+        {
+            step.IfGithubEventIsPush();
+        }
+
+        step.Uses("actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882") // 4.4.3
             .With(
                 ("name", "artifacts"),
                 ("path", path),
