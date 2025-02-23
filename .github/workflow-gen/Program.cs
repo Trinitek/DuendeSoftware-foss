@@ -136,24 +136,30 @@ void GenerateReleaseWorkflow(Component component)
 
     tagJob.Step()
         .Name("Git Config")
-        .Run(@"git config --global user.email ""github-bot@duendesoftware.com""
-git config --global user.name ""Duende Software GitHub Bot""");
+        .Run("""
+             git config --global user.email "github-bot@duendesoftware.com"
+             git config --global user.name "Duende Software GitHub Bot"
+             """);
 
     tagJob.Step()
         .Name("Remove previous git tag")
         .If("github.event.inputs['remove-tag-if-exists'] == 'true'")
-        .Run($@"if git rev-parse {component.TagPrefix}-{contexts.Event.Input.Version} >/dev/null 2>&1; then
-  git tag -d {component.TagPrefix}-{contexts.Event.Input.Version}
-  git push --delete origin {component.TagPrefix}-{contexts.Event.Input.Version}
-else
-  echo 'Tag {component.TagPrefix}-{contexts.Event.Input.Version} does not exist.'
-fi");
+        .Run($"""
+              if git rev-parse {component.TagPrefix}-{contexts.Event.Input.Version} >/dev/null 2>&1; then
+                git tag -d {component.TagPrefix}-{contexts.Event.Input.Version}
+                git push --delete origin {component.TagPrefix}-{contexts.Event.Input.Version}
+              else
+                echo 'Tag {component.TagPrefix}-{contexts.Event.Input.Version} does not exist.'
+              fi
+              """);
 
 
     tagJob.Step()
         .Name("Git tag")
-        .Run($@"git tag -a {component.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
-git push origin {component.TagPrefix}-{contexts.Event.Input.Version}");
+        .Run($"""
+              git tag -a {component.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
+              git push origin {component.TagPrefix}-{contexts.Event.Input.Version}
+              """);
 
     foreach (var project in component.Projects)
     {
@@ -331,6 +337,7 @@ public static class StepExtensions
               done
               """);
     }
+
     /// <summary>
     /// Only run this if the build is triggered on a branch IN the same repo
     /// this means it's from a trusted contributor.
