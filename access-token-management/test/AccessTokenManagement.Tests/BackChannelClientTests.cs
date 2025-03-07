@@ -336,6 +336,61 @@ public class BackChannelClientTests(ITestOutputHelper output)
         replacementCache.SetCount.ShouldBe(1);
     }
 
+    [Fact]
+    public async Task Can_use_custom_cache_implementation_only_for_DistributedClientCredentialsTokenCache()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        var replacementCache = new FakeCache();
+
+        // register the cache, but using a different key (not default 'duende')
+        services.AddKeyedSingleton<IDistributedCache>("different", replacementCache)
+
+            // Now register a custom OptionallyKeyedDependency that uses the different key
+            .AddKeyedTransient<OptionallyKeyedDependency<IDistributedCache>,
+                CustomOptionallyKeyedDependency<IDistributedCache>>(nameof(DistributedClientCredentialsTokenCache));
+
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.TokenEndpoint = "https://as";
+                client.ClientId = "id";
+
+                client.HttpClientName = "custom";
+            });
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When("https://as/*")
+            .Respond(HttpStatusCode.OK, JsonContent.Create(new TokenResponse()));
+
+        services.AddHttpClient("custom")
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+
+        token.Error.ShouldBeNull();
+
+        // Verify we actually used the cache
+        replacementCache.GetCount.ShouldBe(1);
+        replacementCache.SetCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// You can change the key of a dependency by deriving from OptionallyKeyedDependency.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class CustomOptionallyKeyedDependency<T>(
+        T defaultDependency,
+
+        // Here the key is overwritten
+        [FromKeyedServices(("different"))] T? keyedDependency = default(T?))
+        : OptionallyKeyedDependency<T>(defaultDependency, keyedDependency)
+        where T : class;
+
     public class FakeCache : IDistributedCache
     {
         public int GetCount = 0;
@@ -346,10 +401,10 @@ public class BackChannelClientTests(ITestOutputHelper output)
             throw new InvalidOperationException();
         }
 
-        public async Task<byte[]?> GetAsync(string key, CancellationToken token = new CancellationToken())
+        public Task<byte[]?> GetAsync(string key, CancellationToken token = new CancellationToken())
         {
             Interlocked.Increment(ref GetCount);
-            return null;
+            return Task.FromResult<byte[]?>(null);
         }
 
         public void Refresh(string key)
@@ -357,7 +412,7 @@ public class BackChannelClientTests(ITestOutputHelper output)
             throw new InvalidOperationException();
         }
 
-        public async Task RefreshAsync(string key, CancellationToken token = new CancellationToken())
+        public Task RefreshAsync(string key, CancellationToken token = new CancellationToken())
         {
             throw new InvalidOperationException();
         }
@@ -367,7 +422,7 @@ public class BackChannelClientTests(ITestOutputHelper output)
             throw new InvalidOperationException();
         }
 
-        public async Task RemoveAsync(string key, CancellationToken token = new CancellationToken())
+        public Task RemoveAsync(string key, CancellationToken token = new CancellationToken())
         {
             throw new InvalidOperationException();
         }
@@ -377,10 +432,11 @@ public class BackChannelClientTests(ITestOutputHelper output)
             throw new InvalidOperationException();
         }
 
-        public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
             CancellationToken token = new CancellationToken())
         {
             Interlocked.Increment(ref SetCount);
+            return Task.CompletedTask;
         }
     }
 }
