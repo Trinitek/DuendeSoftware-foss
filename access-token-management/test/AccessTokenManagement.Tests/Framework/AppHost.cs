@@ -11,8 +11,56 @@ using Duende.IdentityModel;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using RichardSzalay.MockHttp;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
+using Duende.IdentityServer;
+using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.AccessTokenManagement.Tests;
+
+public class TokenRefresher(
+    IStoreTokensInAuthenticationProperties tokensInProps,
+    IOptions<UserTokenManagementOptions> options,
+    IUserTokenRequestSynchronization sync,
+    IUserTokenEndpointService tokenEndpointService,
+    IUserTokenStore userAccessTokenStore,
+    TimeProvider clock,
+    ILogger<UserAccessAccessTokenManagementService> logger)
+
+{
+    public async Task ValidateToken(ClaimsPrincipal? user, AuthenticationProperties contextProperties,
+        CancellationToken cancellationToken)
+    {
+        var userToken = tokensInProps.GetUserToken(contextProperties);
+        var dtRefresh = userToken.Expiration.Subtract(options.Value.RefreshBeforeExpiration);
+        var utcNow = clock.GetUtcNow();
+
+        var parameters = new UserTokenRequestParameters();
+
+        if (dtRefresh < utcNow)
+        {
+            //await sync.SynchronizeAsync(userToken.RefreshToken!, async () =>
+            //{
+                var refreshedToken =
+                    await tokenEndpointService.RefreshAccessTokenAsync(userToken, parameters, cancellationToken).ConfigureAwait(false);
+                if (refreshedToken.IsError)
+                {
+                    logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);
+                }
+                else
+                {
+                    await userAccessTokenStore.StoreTokenAsync(user, refreshedToken, parameters).ConfigureAwait(false);
+                }
+
+                //return null;
+            //}).ConfigureAwait(false);
+        }
+
+    }
+
+}
 
 public class AppHost : GenericHost
 {
@@ -44,11 +92,20 @@ public class AppHost : GenericHost
     {
         services.AddRouting();
         services.AddAuthorization();
+        services.AddTransient<TokenRefresher>();
 
         services.AddAuthentication("cookie")
             .AddCookie("cookie", options =>
             {
                 options.Cookie.Name = "bff";
+
+                options.Events.OnValidatePrincipal += async context =>
+                {
+                    var refresher = context.HttpContext.RequestServices.GetRequiredService<TokenRefresher>();
+                    
+                    await refresher.ValidateToken(context.Principal, context.Properties, context.HttpContext.RequestAborted);
+                };
+
             });
 
         services.AddAuthentication(options =>
