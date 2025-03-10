@@ -11,8 +11,64 @@ using Duende.IdentityModel;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using RichardSzalay.MockHttp;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.AccessTokenManagement.Tests;
+
+public class EagerTokenRefresher(
+    IStoreTokensInAuthenticationProperties tokensInProps,
+    IOptions<UserTokenManagementOptions> options,
+    IUserTokenRequestSynchronization sync,
+    IUserTokenEndpointService tokenEndpointService,
+    IUserTokenStore userAccessTokenStore,
+    TimeProvider clock,
+    ILogger<UserAccessAccessTokenManagementService> logger)
+
+{
+    public async Task RefreshTokenIfNeeded(ClaimsPrincipal? user, AuthenticationProperties contextProperties,
+        CancellationToken cancellationToken)
+    {
+        var userToken = tokensInProps.GetUserToken(contextProperties);
+        var dtRefresh = userToken.Expiration.Subtract(options.Value.RefreshBeforeExpiration);
+        var utcNow = clock.GetUtcNow();
+
+        if (userToken.AccessToken == null || userToken.RefreshToken == null)
+            return;
+
+        var parameters = new UserTokenRequestParameters();
+
+        if (dtRefresh < utcNow)
+        {
+            await sync.SynchronizeAsync(userToken.RefreshToken!, async () =>
+            {
+            try
+            {
+                var refreshedToken =
+            await tokenEndpointService.RefreshAccessTokenAsync(userToken, parameters, cancellationToken).ConfigureAwait(false);
+                if (refreshedToken.IsError)
+                {
+                    logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);
+                }
+                else
+                {
+                    tokensInProps.SetUserToken(refreshedToken, contextProperties, parameters);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine("Exception: " + ex.ToString());
+            }
+                return null;
+            }).ConfigureAwait(false);
+        }
+
+    }
+
+}
 
 public class AppHost : GenericHost
 {
@@ -21,6 +77,8 @@ public class AppHost : GenericHost
     private readonly IdentityServerHost _identityServerHost;
     private readonly ApiHost _apiHost;
     private readonly Action<UserTokenManagementOptions>? _configureUserTokenManagementOptions;
+
+    public bool AutoRefreshToken { get; set; } = false;
 
     public AppHost(
         WriteTestOutput writeTestOutput,
@@ -45,11 +103,22 @@ public class AppHost : GenericHost
     {
         services.AddRouting();
         services.AddAuthorization();
+        services.AddTransient<EagerTokenRefresher>();
 
         services.AddAuthentication("cookie")
             .AddCookie("cookie", options =>
             {
                 options.Cookie.Name = "bff";
+
+                options.Events.OnValidatePrincipal += async context =>
+                {
+                    if (AutoRefreshToken)
+                    {
+                        var refresher = context.HttpContext.RequestServices.GetRequiredService<EagerTokenRefresher>();
+
+                        await refresher.RefreshTokenIfNeeded(context.Principal, context.Properties, context.HttpContext.RequestAborted);
+                    }
+                };
             });
 
         services.AddAuthentication(options =>
@@ -94,11 +163,11 @@ public class AppHost : GenericHost
                     IdentityServerHttpHandler.When("/.well-known/*")
                         .Respond(identityServerHandler);
                     
-                    options.BackchannelHttpHandler = IdentityServerHttpHandler;
+                    options.BackchannelHttpHandler = new LoggingHttpHandler(IdentityServerHttpHandler);
                 }
                 else
                 {
-                    options.BackchannelHttpHandler = identityServerHandler;
+                    options.BackchannelHttpHandler = new LoggingHttpHandler(identityServerHandler);
                 }
 
                 options.ProtocolValidator.RequireNonce = false;
@@ -118,7 +187,7 @@ public class AppHost : GenericHost
         services.AddUserAccessTokenHttpClient("callApi", configureClient: client => {
             client.BaseAddress = new Uri(_apiHost.Url());
         })
-        .ConfigurePrimaryHttpMessageHandler(() => _apiHost.HttpMessageHandler);
+        .ConfigurePrimaryHttpMessageHandler(() => new LoggingHttpHandler(_apiHost.HttpMessageHandler));
     }
 
     private void Configure(IApplicationBuilder app)
@@ -221,5 +290,26 @@ public class AppHost : GenericHost
 
         response = await BrowserClient.GetAsync(Url(response.Headers.Location!.ToString()));
         return response;
+    }
+}
+
+public class LoggingHttpHandler(HttpMessageHandler inner) : DelegatingHandler(inner)
+{
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            Console.WriteLine("--> " + request.RequestUri!.ToString());
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            Console.WriteLine("<-- " + response.RequestMessage!.RequestUri!.ToString() + " - " + response.StatusCode);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception: " + ex.ToString());
+            throw;
+        }
     }
 }

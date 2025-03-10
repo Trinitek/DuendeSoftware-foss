@@ -10,6 +10,19 @@ using RichardSzalay.MockHttp;
 
 namespace Duende.AccessTokenManagement.Tests;
 
+public class MyTest(ITestOutputHelper output)
+{
+    [Fact]
+    public void Can_Write()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            output.WriteLine(new string('a', 100));
+        }
+    }
+
+}
+
 public class UserTokenManagementTests(ITestOutputHelper output) : IntegrationTestBase(output, "web")
 {
     [Fact]
@@ -270,6 +283,79 @@ public class UserTokenManagementTests(ITestOutputHelper output) : IntegrationTes
         token.AccessTokenType.ShouldBe("token_type2");
         token.RefreshToken.ShouldBe("refreshed2_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+    }
+
+
+    [Fact]
+    public async Task Short_lifetime_with_auto_token_refresh()
+    {
+        // This test makes an initial token request using code flow and then
+        // refreshes the token a couple of times.
+
+        // We mock the expiration of the first few token responses to be short
+        // enough that we will automatically refresh immediately when attempting
+        // to use the tokens, while the final response gets a long refresh time,
+        // allowing us to verify that the token is not refreshed. 
+
+        var mockHttp = new MockHttpMessageHandler();
+        AppHost.IdentityServerHttpHandler = mockHttp;
+
+        AppHost.AutoRefreshToken = true;
+
+        // Respond to code flow with a short token lifetime so that we trigger refresh on 1st use
+        var initialTokenResponse = new
+        {
+            id_token = IdentityServerHost.CreateIdToken("1", "web"),
+            access_token = "initial_access_token",
+            token_type = "token_type",
+            expires_in = 10,
+            refresh_token = "initial_refresh_token",
+        };
+        mockHttp.When("/connect/token")
+            .WithFormData("grant_type", "authorization_code")
+            .Respond("application/json", JsonSerializer.Serialize(initialTokenResponse));
+
+        // Respond to refresh with a short token lifetime so that we trigger another refresh on 2nd use
+        var refreshTokenResponse = new
+        {
+            access_token = "refreshed1_access_token",
+            token_type = "token_type1",
+            expires_in = 10,
+            refresh_token = "refreshed1_refresh_token",
+        };
+        mockHttp.When("/connect/token")
+            .WithFormData("grant_type", "refresh_token")
+            .WithFormData("refresh_token", "initial_refresh_token")
+            .Respond("application/json", JsonSerializer.Serialize(refreshTokenResponse));
+
+        // Respond to second refresh with a long token lifetime so that we don't trigger another refresh on 3rd use
+        var refreshTokenResponse2 = new
+        {
+            access_token = "refreshed2_access_token",
+            token_type = "token_type2",
+            expires_in = 3600,
+            refresh_token = "refreshed2_refresh_token",
+        };
+        mockHttp.When("/connect/token")
+            .WithFormData("grant_type", "refresh_token")
+            .WithFormData("refresh_token", "refreshed1_refresh_token")
+            .Respond("application/json", JsonSerializer.Serialize(refreshTokenResponse2));
+
+        // setup host
+        await InitializeAsync();
+        await AppHost.LoginAsync("alice");
+
+        // first request should trigger refresh
+        var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
+
+        token.ShouldNotBeNull();
+        token.IsError.ShouldBeFalse();
+        token.AccessToken.ShouldBe("refreshed2_access_token");
+        token.AccessTokenType.ShouldBe("token_type2");
+        token.RefreshToken.ShouldBe("refreshed2_refresh_token");
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+
     }
 
     [Fact]

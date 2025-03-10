@@ -50,7 +50,8 @@ public class TestLoggerProvider(WriteTestOutput writeOutput, string name) : ILog
     {
         try
         {
-            _writeOutput?.Invoke(_watch.Elapsed.TotalMilliseconds.ToString("0000") + "ms - " + _name + msg);
+            Console.WriteLine(_watch.Elapsed.TotalMilliseconds.ToString("0000") + "ms - " + _name + msg);
+            //_writeOutput?.Invoke(_watch.Elapsed.TotalMilliseconds.ToString("0000") + "ms - " + _name + msg);
         }
         catch (Exception)
         {
