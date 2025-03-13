@@ -306,7 +306,7 @@ public class BackChannelClientTests(ITestOutputHelper output)
 
         services.AddDistributedMemoryCache();
         var replacementCache = new FakeCache();
-        services.AddKeyedSingleton<IDistributedCache>(OptionallyKeyedDependency.Duende, replacementCache);
+        services.AddKeyedSingleton<IDistributedCache>(nameof(DistributedClientCredentialsTokenCache), replacementCache);
 
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
@@ -335,61 +335,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
         replacementCache.GetCount.ShouldBe(1);
         replacementCache.SetCount.ShouldBe(1);
     }
-
-    [Fact]
-    public async Task Can_use_custom_cache_implementation_only_for_DistributedClientCredentialsTokenCache()
-    {
-        var services = new ServiceCollection();
-
-        services.AddDistributedMemoryCache();
-        var replacementCache = new FakeCache();
-
-        // register the cache, but using a different key (not default 'duende')
-        services.AddKeyedSingleton<IDistributedCache>("different", replacementCache)
-
-            // Now register a custom OptionallyKeyedDependency that uses the different key
-            .AddKeyedTransient<OptionallyKeyedDependency<IDistributedCache>,
-                CustomOptionallyKeyedDependency<IDistributedCache>>(nameof(DistributedClientCredentialsTokenCache));
-
-        services.AddClientCredentialsTokenManagement()
-            .AddClient("test", client =>
-            {
-                client.TokenEndpoint = "https://as";
-                client.ClientId = "id";
-
-                client.HttpClientName = "custom";
-            });
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When("https://as/*")
-            .Respond(HttpStatusCode.OK, JsonContent.Create(new TokenResponse()));
-
-        services.AddHttpClient("custom")
-            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
-
-        var provider = services.BuildServiceProvider();
-        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
-
-        var token = await sut.GetAccessTokenAsync("test");
-
-        token.Error.ShouldBeNull();
-
-        // Verify we actually used the cache
-        replacementCache.GetCount.ShouldBe(1);
-        replacementCache.SetCount.ShouldBe(1);
-    }
-
-    /// <summary>
-    /// You can change the key of a dependency by deriving from OptionallyKeyedDependency.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class CustomOptionallyKeyedDependency<T>(
-        T defaultDependency,
-
-        // Here the key is overwritten
-        [FromKeyedServices(("different"))] T? keyedDependency = default(T?))
-        : OptionallyKeyedDependency<T>(defaultDependency, keyedDependency)
-        where T : class;
 
     public class FakeCache : IDistributedCache
     {

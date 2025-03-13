@@ -24,10 +24,10 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
     /// <param name="cache"></param>
     /// <param name="logger"></param>
     public DistributedDPoPNonceStore(
-        [FromKeyedServices(nameof(DistributedDPoPNonceStore))]OptionallyKeyedDependency<IDistributedCache> cache, 
+        [FromKeyedServices(nameof(DistributedDPoPNonceStore))] IDistributedCache cache, 
         ILogger<DistributedDPoPNonceStore> logger)
     {
-        _cache = cache.Dependency;
+        _cache = cache;
         _logger = logger;
     }
         

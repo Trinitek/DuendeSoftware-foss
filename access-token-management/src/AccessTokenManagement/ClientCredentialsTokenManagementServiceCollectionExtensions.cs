@@ -39,7 +39,10 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
 
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
-        services.TryAddKeyedTransient<OptionallyKeyedDependency<IDistributedCache>>(nameof(DistributedClientCredentialsTokenCache));
+
+        // By default, resolve the distributed cache for the DistributedClientCredentialsTokenCache
+        // without key. If desired, a consumers can register the distributed cache with a key
+        services.TryAddKeyedTransient<IDistributedCache>(nameof(DistributedClientCredentialsTokenCache), (sp, _) => sp.GetRequiredService<IDistributedCache>());
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
         services.TryAddTransient<IClientAssertionService, DefaultClientAssertionService>();
@@ -47,7 +50,10 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IDPoPProofService, DefaultDPoPProofService>();
         services.TryAddTransient<IDPoPKeyStore, DefaultDPoPKeyStore>();
 
-        services.TryAddKeyedTransient<OptionallyKeyedDependency<IDistributedCache>>(nameof(DistributedDPoPNonceStore));
+        // ** DistributedDPoPNonceStore **
+        // By default, resolve the distributed cache for the DistributedClientCredentialsTokenCache
+        // without key. If desired, a consumers can register the distributed cache with a key
+        services.TryAddKeyedTransient<IDistributedCache>(nameof(DistributedDPoPNonceStore), (sp, _) => sp.GetRequiredService<IDistributedCache>());
         services.TryAddTransient<IDPoPNonceStore, DistributedDPoPNonceStore>();
 
         services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName);

@@ -13,14 +13,14 @@ namespace Duende.AccessTokenManagement;
 /// Client access token cache using IDistributedCache
 /// </summary>
 public class DistributedClientCredentialsTokenCache(
-    [FromKeyedServices(nameof(DistributedClientCredentialsTokenCache))] OptionallyKeyedDependency<IDistributedCache> cache,
+    [FromKeyedServices(nameof(DistributedClientCredentialsTokenCache))] IDistributedCache cache,
     ITokenRequestSynchronization synchronization,
     IOptions<ClientCredentialsTokenManagementOptions> options,
     ILogger<DistributedClientCredentialsTokenCache> logger
     )
     : IClientCredentialsTokenCache
 {
-    private readonly IDistributedCache _cache = cache.Dependency;
+    private readonly IDistributedCache _cache = cache;
     private readonly ITokenRequestSynchronization _synchronization = synchronization;
     private readonly ILogger<DistributedClientCredentialsTokenCache> _logger = logger;
     private readonly ClientCredentialsTokenManagementOptions _options = options.Value;
