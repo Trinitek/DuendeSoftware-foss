@@ -20,6 +20,7 @@ public static class ServiceProviderKeys
 public class DistributedClientCredentialsTokenCache(
     [FromKeyedServices(ServiceProviderKeys.DistributedClientCredentialsTokenCache)]HybridCache cache,
     TimeProvider time,
+    ITokenRequestSynchronization synchronization,
     IOptions<ClientCredentialsTokenManagementOptions> options,
     ILogger<DistributedClientCredentialsTokenCache> logger
     )
@@ -38,9 +39,10 @@ public class DistributedClientCredentialsTokenCache(
 
         try
         {
-            var entryOptions = GetHybridCacheEntryOptions(clientName, clientCredentialsToken);
+            var entryOptions = GetHybridCacheEntryOptions(clientCredentialsToken);
 
             var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
+            logger.LogTrace("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, entryOptions.Expiration);
             await cache.SetAsync(cacheKey, clientCredentialsToken, entryOptions, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -51,8 +53,7 @@ public class DistributedClientCredentialsTokenCache(
         }
     }
 
-    private HybridCacheEntryOptions GetHybridCacheEntryOptions(string clientName,
-        ClientCredentialsToken clientCredentialsToken)
+    private HybridCacheEntryOptions GetHybridCacheEntryOptions(ClientCredentialsToken clientCredentialsToken)
     {
         var absoluteCacheExpiration = clientCredentialsToken.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
         var relativeCacheExpiration = absoluteCacheExpiration - time.GetUtcNow();
@@ -60,8 +61,6 @@ public class DistributedClientCredentialsTokenCache(
         {
             Expiration = relativeCacheExpiration
         };
-
-        logger.LogTrace("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, absoluteCacheExpiration);
         return entryOptions;
     }
 
@@ -78,52 +77,52 @@ public class DistributedClientCredentialsTokenCache(
 
         var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
 
-        ClientCredentialsToken token;
+        ClientCredentialsToken? token;
         if (!requestParameters.ForceRenewal)
         {
-            try
-            {
-                // We don't need the token to be absolutely fresh, so we can get one from the cache. 
-                // The GetOrCreate pattern unfortunately doesn't allow us to create a cache entry
-                // that's only valid for as long as it needs to be. 
-                token = await cache.GetOrCreateAsync(
-                    key: cacheKey,
-                    factory: async (ct) =>
-                    {
-                        var result = await factory(clientName, requestParameters, ct).ConfigureAwait(false);
-                        if (result.IsError)
-                        {
-                            // If the token is an error, we throw an exception to prevent the value from being cached
-                            throw new TokenErrorException(result);
-                        }
+            // We don't need the token to be absolutely fresh, so we can get one from the cache. 
+            token = await cache.GetOrDefaultAsync<ClientCredentialsToken>(
+                key: cacheKey,
+                cancellationToken: cancellationToken);
 
-                        return result;
-                    },
-                    cancellationToken: cancellationToken);
-            }
-            catch (TokenErrorException ex)
-            {
-                return ex.Token;
-            }
-
-            if (token.Expiration != DateTimeOffset.MinValue)
+            if (token?.Expiration > DateTimeOffset.MinValue)
             {
                 var absoluteCacheExpiration = token.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
 
                 if (absoluteCacheExpiration > time.GetUtcNow())
                 {
+                    // It's possible that we have only read the token from L2 cache, not L1 cache. 
+                    // just to be sure, write the token also into L1 cache (which should be fast)
+                    // https://github.com/dotnet/extensions/issues/5688#issuecomment-2692247434
+                    var defaultWriteOptions = GetHybridCacheEntryOptions(token);
+                    await cache.SetAsync(cacheKey, token, new HybridCacheEntryOptions()
+                    {
+                        Flags = HybridCacheEntryFlags.DisableDistributedCacheWrite,
+                        Expiration = defaultWriteOptions.Expiration,
+                        LocalCacheExpiration = defaultWriteOptions.LocalCacheExpiration
+                    }, cancellationToken: cancellationToken);
+
                     return token;
                 }
             }
         }
-        token = await factory(clientName, requestParameters, cancellationToken).ConfigureAwait(false);
 
-        if (!token.IsError)
+        // Apparently, there's either no value in the cache, or we want a fresh one.
+        // Since we aren't using GetOrCreate, we'll have to protect against cache stampedes ourselves.
+        return await synchronization.SynchronizeAsync(cacheKey, async () =>
         {
-            await SetAsync(clientName, token, requestParameters, cancellationToken);
-        }
+            token = await factory(clientName, requestParameters, cancellationToken).ConfigureAwait(false);
 
-        return token;
+            // Don't cache the token if there's an error. 
+            if (!token.IsError)
+            {
+                await SetAsync(clientName, token, requestParameters, cancellationToken);
+            }
+
+            return token;
+        });
+
+        
     }
 
 

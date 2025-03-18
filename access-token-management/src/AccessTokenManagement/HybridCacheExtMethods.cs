@@ -17,12 +17,11 @@ public static class HybridCacheExtMethods
                 | HybridCacheEntryFlags.DisableUnderlyingData
     };
 
-    public static async ValueTask<T?> GetOrDefaultAsync<T>(this HybridCache cache, string key)
+    public static async ValueTask<T?> GetOrDefaultAsync<T>(this HybridCache cache, string key, CancellationToken cancellationToken = default)
     {
         return await cache.GetOrCreateAsync<T?>(
             key,
             null!, // Don't return a value if it's not in the cache. Also, don't write it to the cache
-            GetOnlyEntryOptions
-        );
+            GetOnlyEntryOptions, cancellationToken: cancellationToken);
     }
 }

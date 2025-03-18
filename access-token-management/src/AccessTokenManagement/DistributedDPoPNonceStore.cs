@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.AccessTokenManagement;
 
@@ -17,6 +18,11 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
 
     private readonly HybridCache _cache;
     private readonly ILogger<DistributedDPoPNonceStore> _logger;
+
+    private static readonly HybridCacheEntryOptions NonceStoreCacheOptions = new HybridCacheEntryOptions()
+    {
+        LocalCacheExpiration = TimeSpan.FromHours(1)
+    };
 
     /// <summary>
     /// ctor
@@ -56,16 +62,11 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
 
         var data = nonce;
 
-        var cacheExpiration = TimeSpan.FromHours(1);
-        var entryOptions = new HybridCacheEntryOptions()
-        {
-            Expiration = cacheExpiration
-        };
 
-        _logger.LogTrace("Caching DPoP nonce for URL: {url}, method: {method}. Expiration: {expiration}", context.Url, context.Method, cacheExpiration);
+        _logger.LogTrace("Caching DPoP nonce for URL: {url}, method: {method}. Expiration: {expiration}", context.Url, context.Method, NonceStoreCacheOptions.Expiration);
 
         var cacheKey = GenerateCacheKey(context);
-        await _cache.SetAsync(cacheKey, data, entryOptions, cancellationToken: cancellationToken).ConfigureAwait(false);
+        await _cache.SetAsync(cacheKey, data, NonceStoreCacheOptions, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
 
