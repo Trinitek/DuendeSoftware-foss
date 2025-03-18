@@ -5,10 +5,49 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
-
 namespace Duende.AccessTokenManagement.Tests;
+
+public class HybridCacheTests
+{
+    [Fact]
+    public async Task Returning_null()
+    {
+        var services = new ServiceCollection()
+            .AddHybridCache()
+            .Services;
+
+        var cache = services.BuildServiceProvider()
+            .GetService<HybridCache>();
+
+        int count = 0;
+        object item;
+
+        try
+        {
+            item = await cache.GetOrCreateAsync<object>("key", (_) =>
+            {
+                count++;
+                throw new InvalidOperationException();
+                return ValueTask.FromResult<object>(null);
+            });
+        }
+        catch (InvalidOperationException)
+        {
+
+        }
+        item = await cache.GetOrCreateAsync<object>("key", (_) =>
+        {
+            count++;
+            return ValueTask.FromResult<object>(null);
+        });
+
+        item.ShouldBeNull();
+        count.ShouldBe(2);
+    }
+}
 
 public class BackChannelClientTests(ITestOutputHelper output)
 {
@@ -17,7 +56,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
 
-        services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
@@ -48,7 +86,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
 
-        services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
@@ -80,7 +117,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
 
-        services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
@@ -130,7 +166,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
 
-        services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
@@ -199,7 +234,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
 
-        services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
@@ -278,7 +312,6 @@ public class BackChannelClientTests(ITestOutputHelper output)
 
         var services = new ServiceCollection();
 
-        services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
